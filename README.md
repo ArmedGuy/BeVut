@@ -3,7 +3,7 @@
 ## Installation Guide
 
 ## Contributing
-More details in CONTRIBUTING.md.
+More details in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ##License
 Code is available under derivative of MIT. See respective LICENSE files in project root for code.
