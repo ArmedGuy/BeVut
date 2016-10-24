@@ -6,4 +6,4 @@
 More details in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ##License
-Code is available under derivative of MIT. See respective LICENSE files in project root for code.
+Code is available under a derivative of MIT License. See [LICENSE.md](./LICENSE.md) file in project root for details.
