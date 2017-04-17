@@ -1,0 +1,42 @@
+﻿{% extends "app/shared_layout.html" %}
+{% block body %}
+    <nav class="blue-grey darken-2" role="navigation">
+    <div class="nav-wrapper container">
+      <a id="logo-container" href="#" class="brand-logo"><img src="http://ki.se/sites/all/themes/ki/images/open_graph.png" style="height:70px;line-height:64px;"/></a>
+      <ul class="right hide-on-med-and-down">
+        {% include "app/navmenu.html" %}
+      </ul>
+
+      <ul id="nav-mobile" class="side-nav">
+        {% include "app/navmenu.html" %}
+      </ul>
+      <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+    </div>
+  </nav>
+  <main>
+        {% block content %}{% endblock %}
+  </main>
+  <footer class="page-footer black-text grey lighten-3" style="margin-top: 70px;">
+    <div class="container">
+      <div class="row">
+        <div class="col l6 s12">
+          <h5 class="grey-text text-darken-3">Om BeVut-Dig</h5>
+          <p class="grey-text text-darken-1">
+              BeVut-Dig är en digital tjänst för att hantera och bedöma studenter som utbildar sig inom sjukvård. Det bygger på bedömningsformuläret BeVut, och är anpassat för mobila enheter.
+          </p>
+
+
+        </div>
+        <div class="col l3 s12">
+        </div>
+        <div class="col l3 s12">
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <div class="container grey-text text-darken-2">
+      &copy; 2017 Hägg & Ulfvarson | Version 0.0.1
+      </div>
+    </div>
+  </footer>
+{% endblock %}

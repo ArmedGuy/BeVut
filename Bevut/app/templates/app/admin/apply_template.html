@@ -1,0 +1,42 @@
+﻿{% extends "admin/base_site.html" %}
+{% block extrastyle %}<link rel="stylesheet" type="text/css" href="/static/admin/css/changelists.css" />{% endblock %}
+{% block bodyclass%}dashboard{%endblock%}
+{% block content %}
+<div id="content-main">
+    <div id="changelist" class="module">
+        <table>
+            <caption>Kurser utan applicerade mallar</caption>
+            <thead>
+                <tr>
+                    <th>
+                        <div class="text">
+                            <span>Kurs</span>
+                        </div>
+                        <div class="clear"></div>
+                    </th>
+                    <th>
+                        <div class="text">
+                            <span>Applicera</span>
+                        </div>
+                        <div class="clear"></div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in courses %}
+                    <tr>
+                        <th>{{c}}</th>
+                        <td>
+                            <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="course_id" value="{{c.id}}" />
+                            <input type="submit" class="button default" value="Applicera" />
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

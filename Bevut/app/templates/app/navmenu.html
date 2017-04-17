@@ -1,0 +1,9 @@
+﻿{% if user.is_authenticated %}
+    {% if user.is_staff %}
+    <li><a href="/admin">Administration</a></li>
+    {% endif %}
+    <li><a href="#">Klasser</a></li>
+    <li><a href="#">Logga ut</a></li>
+{% else %}
+    <li><a href="#">Logga in</a></li>
+{% endif %}

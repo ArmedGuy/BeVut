@@ -2,45 +2,26 @@
 Definition of views.
 """
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest
 from django.template import RequestContext
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
+from app.models import Course
 
 def home(request):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'app/index.html',
-        {
-            'title':'Home Page',
-            'year':datetime.now().year,
-        }
-    )
+    if request.user.is_authenticated:
+        return redirect("/app")
+    return redirect("/login")
 
-def contact(request):
-    """Renders the contact page."""
-    assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'app/contact.html',
-        {
-            'title':'Contact',
-            'message':'Your contact page.',
-            'year':datetime.now().year,
-        }
-    )
+@login_required
+def courses(request):
+    courses = Course.objects.filter(applied=True)
+    return render(request, "app/index.html", {"courses": courses})
 
-def about(request):
-    """Renders the about page."""
-    assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        'app/about.html',
-        {
-            'title':'About',
-            'message':'Your application description page.',
-            'year':datetime.now().year,
-        }
-    )
+
+def course(request, *args, **kwargs):
+    course = get_object_or_404(Course, pk=kwargs['id'])
+    return render(request, "app/course.html", {"course": course})

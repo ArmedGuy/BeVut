@@ -18,18 +18,12 @@ admin.autodiscover()
 urlpatterns = [
     # Examples:
     url(r'^$', app.views.home, name='home'),
-    url(r'^contact$', app.views.contact, name='contact'),
-    url(r'^about', app.views.about, name='about'),
+    url(r'^app/$', app.views.courses, name='app_home'),
+    url(r'^app/course/(?<id>[0-9]+)/$', app.views.course, name='course'),
     url(r'^login/$',
         django.contrib.auth.views.login,
         {
-            'template_name': 'app/login.html',
-            'authentication_form': app.forms.BootstrapAuthenticationForm,
-            'extra_context':
-            {
-                'title': 'Log in',
-                'year': datetime.now().year,
-            }
+            'template_name': 'app/login.html'
         },
         name='login'),
     url(r'^logout$',
