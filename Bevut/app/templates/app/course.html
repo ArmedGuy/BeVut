@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container">
     <h2>{{ course.name }} <small class="grey-text">Kurs {{ course.year }} {{ course.term }}</small></h2>
-    {% if course.form_templates.count != 0 %}
+    {% if student_forms %}
     <table class="striped">
         <thead>
             <tr>
@@ -36,8 +36,8 @@
         <tbody>
             {% for s in students %}
             <tr>
-                <td>{{ student.name }}</td>
-                <td>{{ student.ssn}}</td>
+                <td>{{ s.name }}</td>
+                <td>{{ s.ssn }}</td>
             </tr>
             {% endfor %}
         </tbody>

@@ -25,4 +25,9 @@ def courses(request):
 def course(request, *args, **kwargs):
     course = get_object_or_404(Course, pk=kwargs['id'])
     student_forms = course.student_forms.all()
-    return render(request, "app/course.html", {"course": course, "student_forms": student_forms})
+    students = []
+    if len(student_forms) == 0:
+        students = course.students.all()
+    else:
+        students = [x.student for x in student_forms]
+    return render(request, "app/course.html", {"course": course, "student_forms": student_forms, "students": students })
