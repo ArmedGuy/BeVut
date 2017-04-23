@@ -44,7 +44,7 @@ class FormTemplate(models.Model):
     name = models.CharField("Namn", max_length=64)
     has_well_done = models.BooleanField("Kan betyget väl godkänt ges?", help_text="Kryssa i det här om du vill att betygskriterier för väl godkänt ska synas och bedömas")
     applied = models.BooleanField("Har formuläret applicerats på en kurs?", default=False)
-    course = models.ForeignKey(Course, related_name = "form_template", verbose_name = "Applicerad på kurs", null = True, default = None)
+    course = models.ForeignKey(Course, related_name = "form_templates", verbose_name = "Applicerad på kurs", null = True, default = None)
     
     def __str__(self):
         if self.applied:
@@ -71,11 +71,15 @@ class FormOption(models.Model):
 
 class StudentForm(models.Model):
     student = models.ForeignKey(Student)
+    course = models.ForeignKey(Course, related_name = "student_forms", null = True)
     template = models.ForeignKey(FormTemplate)
     location = models.CharField("VFU-placering", max_length=256)
+    midterm_signed = models.BooleanField("Halvtidsbedömning gjord")
+    fullterm_signed = models.BooleanField("Heltidsbedömning gjord")
+    locked = models.BooleanField("Låst")
     
     def __str__(self):
-        return "%s (%s)" % (self.student.name, self.student.course.name)
+        return "%s (%s)" % (self.student.name, self.course.name)
 
     class Meta:
         verbose_name = "studentformulär"
@@ -84,8 +88,8 @@ class StudentForm(models.Model):
 class FormSigningAttendance(models.Model):
     title = models.CharField("Titel/befattning", max_length=256)
     name = models.CharField("Namn", max_length=256)
-    midterm_sign = models.ForeignKey(StudentForm, related_name="midterm_signed")
-    term_sign = models.ForeignKey(StudentForm, related_name="term_signed")
+    midterm_sign = models.ForeignKey(StudentForm, related_name="midterm_user_signed")
+    term_sign = models.ForeignKey(StudentForm, related_name="fullterm_user_signed")
 
     class Meta:
         verbose_name = "signerat namn"

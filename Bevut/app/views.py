@@ -18,10 +18,11 @@ def home(request):
 
 @login_required
 def courses(request):
-    courses = Course.objects.filter(applied=True)
+    courses = Course.objects.filter()
     return render(request, "app/index.html", {"courses": courses})
 
 
 def course(request, *args, **kwargs):
     course = get_object_or_404(Course, pk=kwargs['id'])
-    return render(request, "app/course.html", {"course": course})
+    student_forms = course.student_forms.all()
+    return render(request, "app/course.html", {"course": course, "student_forms": student_forms})
