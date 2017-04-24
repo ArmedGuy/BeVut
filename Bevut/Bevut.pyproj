@@ -58,9 +58,12 @@
     <Folder Include="app\templates\" />
     <Folder Include="app\templates\app\" />
     <Folder Include="app\templates\app\admin\" />
+    <Folder Include="app\templates\admin\" />
     <Folder Include="Bevut\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="app\static\app\content\admin.css" />
+    <Content Include="app\templates\admin\base.html" />
     <Content Include="app\templates\app\admin\apply_template.html" />
     <Content Include="app\templates\app\course.html" />
     <Content Include="app\templates\app\navmenu.html" />
