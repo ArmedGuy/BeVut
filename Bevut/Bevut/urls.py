@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^$', app.views.home, name='home'),
     url(r'^app/$', app.views.courses, name='app_home'),
     url(r'^app/course/(?P<id>[0-9]+)/$', app.views.course, name='course'),
+    url(r'^app/form/(?P<id>[0-9]+)/$', app.views.student_form, name='student_form'),
     url(r'^login/$',
         django.contrib.auth.views.login,
         {
