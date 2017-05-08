@@ -1,0 +1,53 @@
+{% extends "app/app_layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ student_form }}</h2>
+    <div class="row">
+        <div class="col m6">
+            <div class="card-panel grey lighten-2">
+                <h5>Halvtidsbedömning</h5>
+                <h4>Ej genomförd</h4>
+            </div>
+        </div>
+        <div class="col m6">
+            <div class="card-panel grey lighten-2">
+                <h5>Heltidsbedömning</h5>
+                <h4>Ej genomförd</h4>
+            </div>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    Lärandeaspekter
+                </th>
+                <th>
+                    Kriterier för godkänt
+                </th>
+                {% if student_form.template.has_well_done %}
+                <th>
+                    Kriterier för väl godkänt
+                </th>
+                {% endif %}
+                <th>
+                    Kriterier för icke godkänt
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for question in student_form.template.formoption_set.all %}
+            <tr>
+                <td>{{ question.description }}</td>
+                <td>{{ question.done_description }}</td>
+                {% if student_form.template.has_well_done %}
+                <td>{{ question.well_done_description }}</td>
+                {% endif %}
+                <td>{{ question.not_done_description }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

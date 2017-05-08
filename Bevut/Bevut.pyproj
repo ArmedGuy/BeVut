@@ -65,6 +65,7 @@
     <Content Include="app\static\app\content\admin.css" />
     <Content Include="app\templates\admin\base.html" />
     <Content Include="app\templates\app\admin\apply_template.html" />
+    <Content Include="app\templates\app\form.html" />
     <Content Include="app\templates\app\course.html" />
     <Content Include="app\templates\app\navmenu.html" />
     <Content Include="app\templates\app\shared_layout.html" />

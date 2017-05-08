@@ -21,7 +21,7 @@ def courses(request):
     courses = Course.objects.filter()
     return render(request, "app/index.html", { "courses": courses })
 
-
+@login_required
 def course(request, *args, **kwargs):
     course = get_object_or_404(Course, pk=kwargs['id'])
     student_forms = course.student_forms.all()
