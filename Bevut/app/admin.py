@@ -25,7 +25,7 @@ class OptionInline(admin.TabularInline):
 @admin.register(FormTemplate)
 class TemplateAdmin(admin.ModelAdmin):
     save_as = True
-    fields = ['name', 'has_well_done']
+    fields = ['name', 'has_well_done', 'applied']
     list_display = ["__str__", "apply_template_link"]
     inlines = (OptionInline,)
 
@@ -87,6 +87,10 @@ class FormAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(FormAnswer)
+class FormAnswerAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(Course)

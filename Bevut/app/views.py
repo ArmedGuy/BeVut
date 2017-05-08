@@ -37,4 +37,8 @@ def student_form(request, *args, **kwargs):
     ctx = {}
     form = get_object_or_404(StudentForm, pk=kwargs['id'])
     ctx['student_form'] = form
+    ctx['midterm_answers'] = form.formanswer_set.filter(is_midterm=True)
+    ctx['fullterm_answers'] = form.formanswer_set.filter(is_midterm=False)
+    ctx['midterm_in_progress'] = request.GET.get("midterm", False) or ctx['midterm_answers'].count() != 0
+    ctx['fullterm_in_progress'] = request.GET.get("fullterm", False) or ctx['fullterm_answers'].count() != 0
     return render(request, "app/form.html", ctx)

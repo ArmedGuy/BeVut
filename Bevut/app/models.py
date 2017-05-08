@@ -56,6 +56,7 @@ class FormTemplate(models.Model):
         verbose_name_plural = "formulärsmallar"
 
 class FormOption(models.Model):
+    nr = models.IntegerField("Nummer", help_text = "Siffra på fråga, används för sortering och för att lätt kunna referera")
     description = models.TextField("Lärandeaspekter")
     done_description = models.TextField("Kriterier för godkänt")
     well_done_description = models.TextField("Kriterier för väl godkänt", help_text = "Behövs endast om formuläret har Väl Godkänt", blank=True)

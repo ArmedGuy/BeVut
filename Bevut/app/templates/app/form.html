@@ -1,51 +1,144 @@
 {% extends "app/app_layout.html" %}
 
 {% block content %}
+<style>
+    .answer-box {
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        font-size: 18px;
+        text-align: center;
+        color: white;
+    }
+    .number-box {
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        font-size: 18px;
+        text-align: center;
+        background-color: #ddd;
+    }
+    table tbody td {
+        vertical-align: top;
+    }
+    table tbody td p {
+        margin: 4px;
+    }
+    table tbody tr:nth-child(even) td:nth-child(odd) {
+        background-color: #eee;
+        
+    }
+    table tbody tr:nth-child(odd) td:nth-child(even) {
+        background-color: #eee;
+    }
+    td.results, td.numbers {
+        background-color: transparent !important;
+        padding: 0px;
+    }
+</style>
 <div class="container">
     <h2>{{ student_form }}</h2>
     <div class="row">
         <div class="col m6">
-            <div class="card-panel grey lighten-2">
+            <div class="card-panel grey lighten-3">
                 <h5>Halvtidsbedömning</h5>
+                {% if student_form.midterm_signed %}
+                <h4>Slutförd</h4>
+                {% elif midterm_answers.count != 0 %}
+                <h4>Påbörjad</h4>
+                {% else %}
                 <h4>Ej genomförd</h4>
+                <a class="waves-effect waves-light btn" href="?midterm">Påbörja</a>
+                {% endif %}
             </div>
         </div>
         <div class="col m6">
-            <div class="card-panel grey lighten-2">
+            <div class="card-panel grey lighten-3">
                 <h5>Heltidsbedömning</h5>
+                {% if student_form.fullterm_signed %}
+                <h4>Slutförd</h4>
+                {% elif fullterm_answers.count != 0 %}
+                <h4>Påbörjad</h4>
+                {% else %}
                 <h4>Ej genomförd</h4>
+                <a class="waves-effect waves-light btn" {% if not student_form.midterm_signed %}disabled{% endif %} href="?fullterm">Påbörja</a>
+                {% if not student_form.midterm_signed %}
+                Halvtidsbedöming inte klar
+                {% endif %}
+                {% endif %}
             </div>
         </div>
     </div>
     <table>
         <thead>
-            <tr>
-                <th>
-                    Lärandeaspekter
-                </th>
-                <th>
-                    Kriterier för godkänt
-                </th>
-                {% if student_form.template.has_well_done %}
-                <th>
-                    Kriterier för väl godkänt
-                </th>
-                {% endif %}
-                <th>
-                    Kriterier för icke godkänt
-                </th>
-            </tr>
+        <tr>
+            <th></th>
+            <th>
+                Lärandeaspekter
+            </th>
+            <th>
+                Kriterier för godkänt
+            </th>
+            {% if student_form.template.has_well_done %}
+            <th>
+                Kriterier för väl godkänt
+            </th>
+            {% endif %}
+            <th>
+                Kriterier för icke godkänt
+            </th>
+        </tr>
         </thead>
         <tbody>
-            {% for question in student_form.template.formoption_set.all %}
-            <tr>
-                <td>{{ question.description }}</td>
-                <td>{{ question.done_description }}</td>
-                {% if student_form.template.has_well_done %}
-                <td>{{ question.well_done_description }}</td>
+        {% for question in student_form.template.formoption_set.all %}
+                
+        <tr>
+            <td class="numbers">
+                    <div class="number-box">
+                        {{ question.nr }}
+                    </div>
+                </td>
+            <td>
+                <p>{{ question.description }}</p></td>
+            <td>
+                <p>{{ question.done_description }}</p>
+
+            </td>
+            {% if student_form.template.has_well_done %}
+            <td>
+                <p>{{ question.well_done_description }}</p>
+            </td>
+            {% endif %}
+            <td>
+                <p>{{ question.not_done_description }}</p>
+            </td>
+            <td class="results">
+                {% for a in question.formanswer_set.all %}
+                {% if a.result == "OK" %}
+                <div class="answer-box lime">
+                    OK
+                </div>
                 {% endif %}
-                <td>{{ question.not_done_description }}</td>
-            </tr>
+
+                {% if a.result == "V" %}
+                <div class="answer-box yellow darken-3">
+                    V
+                </div>
+                {% endif %}
+                {% if a.result == "U" %}
+                <div class="answer-box red darken-4">
+                    U
+                </div>
+                {% endif %}
+                {% if a.result == "G" %}
+                <div class="answer-box light-green darken-3">G</div>
+                {% endif %}
+                {% if a.result == "VG" %}
+                <div class="answer-box light-green darken-3">VG</div>
+                {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
             {% endfor %}
         </tbody>
     </table>
