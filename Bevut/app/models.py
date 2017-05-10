@@ -80,7 +80,7 @@ class StudentForm(models.Model):
     locked = models.BooleanField("Låst")
     
     def __str__(self):
-        return "%s (%s)" % (self.student.name, self.course.name)
+        return "%s - %s" % (self.student.name, self.course)
 
     class Meta:
         verbose_name = "studentformulär"

@@ -1,5 +1,24 @@
 {% extends "app/app_layout.html" %}
-
+{% load dict_tags %}
+{% block scripts %}
+<script>
+    $(function () {
+        $(".results input[type=hidden]").each(function() {
+            var value = $(this).val();
+            if (value === "")
+                return;
+            $(this).parent().children(".answer-box.set.result-" + value).addClass("selected");
+        });
+        $(".set")
+            .click(function () {
+                $(this).parent().children(".answer-box.set").removeClass("selected");
+                var val = $(this).text();
+                $(this).parent().children("input[type=hidden]").val(val);
+                $(this).addClass("selected");
+            });
+    });
+</script>
+{% endblock %}
 {% block content %}
 <style>
     .answer-box {
@@ -8,6 +27,34 @@
         line-height: 60px;
         font-size: 18px;
         text-align: center;
+        color: white;
+    }
+    .result-V {
+        background-color: #ff9100;
+    }
+    .result-OK {
+        background-color: #aeea00;
+    }
+    .result-U {
+        background-color: #d50000;
+    }
+    .result-G {
+        background-color: #33691e;
+    }
+    .result-VG {
+        background-color: #01579b;
+    }
+    .answer-box.set {
+        opacity: 0.6;
+        cursor: pointer;
+    }
+    .answer-box.set:hover {
+        opacity: 0.8;
+    }
+    .answer-box.selected {
+        opacity: 1;
+    }
+    .answer-box label {
         color: white;
     }
     .number-box {
@@ -34,39 +81,54 @@
     td.results, td.numbers {
         background-color: transparent !important;
         padding: 0px;
+        padding-bottom: 10px;
     }
 </style>
+
 <div class="container">
     <h2>{{ student_form }}</h2>
     <div class="row">
         <div class="col m6">
-            <div class="card-panel grey lighten-3">
+            <div class="card-panel grey lighten-5">
                 <h5>Halvtidsbedömning</h5>
                 {% if student_form.midterm_signed %}
                 <h4>Slutförd</h4>
-                {% elif midterm_answers.count != 0 %}
+                {% elif midterm_in_progress %}
                 <h4>Påbörjad</h4>
                 {% else %}
                 <h4>Ej genomförd</h4>
-                <a class="waves-effect waves-light btn" href="?midterm">Påbörja</a>
+                <a class="waves-effect waves-light btn" href="?term=midterm">Påbörja</a>
                 {% endif %}
             </div>
         </div>
         <div class="col m6">
-            <div class="card-panel grey lighten-3">
+            <div class="card-panel grey lighten-5">
                 <h5>Heltidsbedömning</h5>
                 {% if student_form.fullterm_signed %}
                 <h4>Slutförd</h4>
-                {% elif fullterm_answers.count != 0 %}
+                {% elif fullterm_in_progress %}
                 <h4>Påbörjad</h4>
                 {% else %}
                 <h4>Ej genomförd</h4>
-                <a class="waves-effect waves-light btn" {% if not student_form.midterm_signed %}disabled{% endif %} href="?fullterm">Påbörja</a>
+                <a class="waves-effect waves-light btn" {% if not student_form.midterm_signed %}disabled{% endif %} href="?term=fullterm">Påbörja</a>
                 {% if not student_form.midterm_signed %}
                 Halvtidsbedöming inte klar
                 {% endif %}
                 {% endif %}
             </div>
+        </div>
+    </div>
+    <form method="POST">
+    {% csrf_token %}
+    <div class="card-panel grey lighten-5">
+        <h5>Information</h5>
+        <div class="input-field">
+            <input id="ssn" type="text" value="{{ student_form.student.ssn }}">
+            <label for="ssn">Personnummer - kan ej ändras här</label>
+        </div>
+        <div class="input-field">
+            <input id="location" type="text" name="location" class="validate" value="{{ student_form.location }}">
+            <label for="location">VFU-placering</label>
         </div>
     </div>
     <table>
@@ -94,10 +156,10 @@
                 
         <tr>
             <td class="numbers">
-                    <div class="number-box">
-                        {{ question.nr }}
-                    </div>
-                </td>
+                <div class="number-box">
+                    {{ question.nr }}
+                </div>
+            </td>
             <td>
                 <p>{{ question.description }}</p></td>
             <td>
@@ -113,34 +175,68 @@
                 <p>{{ question.not_done_description }}</p>
             </td>
             <td class="results">
+                {% if midterm_in_progress %}
+                <input type="hidden" name="{{question.id}}" value="{{ midterm_answers|get_item:question.id }}"/>
+                <div class="answer-box set result-OK">OK</div>
+                <div class="answer-box set result-V">V</div>
+                {% endif %}
+                {% if fullterm_in_progress %}
+                <input type="hidden" name="{{question.id}}" value="{{ fullterm_answers|get_item:question.id }}"/>
+                {% if form.has_well_done %}
+                <div class="answer-box set result-VG">VG</div>
+                {% endif %}
+                <div class="answer-box set result-G">G</div>
+                <div class="answer-box set result-U">U</div>
+                <hr/>
+                {% endif %}
                 {% for a in question.formanswer_set.all %}
-                {% if a.result == "OK" %}
-                <div class="answer-box lime">
-                    OK
-                </div>
+                {% if a.result == "OK" and not midterm_in_progress %}
+                <div class="answer-box result-OK">OK</div>
                 {% endif %}
-
-                {% if a.result == "V" %}
-                <div class="answer-box yellow darken-3">
-                    V
-                </div>
+                {% if a.result == "V" and not midterm_in_progress %}
+                <div class="answer-box result-V">V</div>
                 {% endif %}
-                {% if a.result == "U" %}
-                <div class="answer-box red darken-4">
-                    U
-                </div>
+                {% if a.result == "U" and not fullterm_in_progress %}
+                <div class="answer-box result-U">U</div>
                 {% endif %}
-                {% if a.result == "G" %}
-                <div class="answer-box light-green darken-3">G</div>
+                {% if a.result == "G" and not fullterm_in_progress %}
+                <div class="answer-box result-G">G</div>
                 {% endif %}
-                {% if a.result == "VG" %}
-                <div class="answer-box light-green darken-3">VG</div>
+                {% if a.result == "VG" and not fullterm_in_progress %}
+                <div class="answer-box result-VG">VG</div>
                 {% endif %}
                 {% endfor %}
             </td>
         </tr>
-            {% endfor %}
+        {% endfor %}
         </tbody>
     </table>
+        {% if midterm_in_progress %}
+        <div class="card-panel grey lighten-5">
+            <h4>Halvtidsbedömning</h4>
+            <input type="hidden" name="term" value="midterm"/>
+            <p>
+                <input type="checkbox" name="sign" id="sign" value="true"/>
+                <label for="sign">Slutför och signera halvtidsbedömning</label>
+            </p>
+            <div class="input-field">
+                <input type="submit" value="Uppdatera" class="btn-large"/>
+            </div>
+        </div>
+        {% endif %}
+        {% if fullterm_in_progress %}
+        <div class="card-panel grey lighten-5">
+            <h4>Heltidsbedömning</h4>
+            <input type="hidden" name="term" value="fullterm"/>
+            <p>
+                <input type="checkbox" name="sign" id="sign" value="true"/>
+                <label for="sign">Slutför och signera heltidsbedömning</label>
+            </p>
+            <div class="input-field">
+                <input type="submit" value="Uppdatera" class="btn-large"/>
+            </div>
+        </div>
+        {% endif %}
+    </form>
 </div>
 {% endblock %}

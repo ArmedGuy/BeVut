@@ -34,6 +34,12 @@
     </Compile>
     <Compile Include="app\forms.py" />
     <Compile Include="app\models.py" />
+    <Compile Include="app\templatetags\dict_tags.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="app\templatetags\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="app\tests.py" />
     <Compile Include="app\views.py" />
     <Compile Include="app\__init__.py" />
@@ -59,6 +65,7 @@
     <Folder Include="app\templates\app\" />
     <Folder Include="app\templates\app\admin\" />
     <Folder Include="app\templates\admin\" />
+    <Folder Include="app\templatetags\" />
     <Folder Include="Bevut\" />
   </ItemGroup>
   <ItemGroup>
