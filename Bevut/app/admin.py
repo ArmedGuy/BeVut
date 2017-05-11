@@ -38,7 +38,7 @@ class TemplateAdmin(admin.ModelAdmin):
     apply_template_link.short_description = "Applicera"
 
     def has_delete_permission(self, request, obj=None):
-        return obj == None or not obj.applied
+        return obj == None or not obj.applied or request.user.is_superuser
 
     def get_urls(self):
         urls = super(TemplateAdmin, self).get_urls()
@@ -55,6 +55,9 @@ class TemplateAdmin(admin.ModelAdmin):
             template.course = course
             template.applied = True
             template.save()
+            for student in course.students.all():
+                sf = StudentForm(student=student, course=course, template=template)
+                sf.save()
             self.message_user(request, "Applicerade formulär på kursen %s" % course.name)
             return redirect("/admin/app/formtemplate")
         else:

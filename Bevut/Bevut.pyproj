@@ -76,6 +76,7 @@
     <Content Include="app\templates\app\course.html" />
     <Content Include="app\templates\app\navmenu.html" />
     <Content Include="app\templates\app\shared_layout.html" />
+    <Content Include="Dockerfile" />
     <Content Include="requirements.txt" />
     <Content Include="db.sqlite3" />
     <Content Include="app\static\app\content\bootstrap.css" />
