@@ -25,7 +25,7 @@ class OptionInline(admin.TabularInline):
 @admin.register(FormTemplate)
 class TemplateAdmin(admin.ModelAdmin):
     save_as = True
-    fields = ['name', 'has_well_done', 'applied']
+    fields = ['name', 'has_well_done']
     list_display = ["__str__", "apply_template_link"]
     inlines = (OptionInline,)
 
@@ -59,7 +59,7 @@ class TemplateAdmin(admin.ModelAdmin):
             return redirect("/admin/app/formtemplate")
         else:
             
-            courses = Course.objects.filter(form_template=None)
+            courses = Course.objects.filter(form_templates=None)
             context = dict(
                     self.admin_site.each_context(request),
                     title = "Applicera mall på kurs",
@@ -81,16 +81,8 @@ class TemplateAdmin(admin.ModelAdmin):
                 return
         return super(TemplateAdmin, self).save_formset(request, form, formset, change)
 
-@admin.register(StudentForm)
-class FormAdmin(admin.ModelAdmin):
-    pass
-
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    pass
-
-@admin.register(FormAnswer)
-class FormAnswerAdmin(admin.ModelAdmin):
     pass
 
 @admin.register(Course)
