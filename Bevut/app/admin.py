@@ -56,7 +56,7 @@ class TemplateAdmin(admin.ModelAdmin):
             template.applied = True
             template.save()
             for student in course.students.all():
-                sf = StudentForm(student=student, course=course, template=template)
+                sf = StudentForm(student=student, course=course, template=template, midterm_signed=False, fullterm_signed=False, locked=False)
                 sf.save()
             self.message_user(request, "Applicerade formulär på kursen %s" % course.name)
             return redirect("/admin/app/formtemplate")

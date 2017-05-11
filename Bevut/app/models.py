@@ -74,10 +74,10 @@ class StudentForm(models.Model):
     student = models.ForeignKey(Student)
     course = models.ForeignKey(Course, related_name = "student_forms", null = True)
     template = models.ForeignKey(FormTemplate)
-    location = models.CharField("VFU-placering", max_length=256)
-    midterm_signed = models.BooleanField("Halvtidsbedömning gjord")
-    fullterm_signed = models.BooleanField("Heltidsbedömning gjord")
-    locked = models.BooleanField("Låst")
+    location = models.CharField("VFU-placering", max_length=256, blank=True)
+    midterm_signed = models.BooleanField("Halvtidsbedömning gjord", default=False)
+    fullterm_signed = models.BooleanField("Heltidsbedömning gjord", default=False)
+    locked = models.BooleanField("Låst", default=False)
     
     def __str__(self):
         return "%s - %s" % (self.student.name, self.course)
