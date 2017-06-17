@@ -2,7 +2,7 @@
 {% block body %}
     <nav class="blue-grey darken-2" role="navigation">
     <div class="nav-wrapper container">
-      <a id="logo-container" href="#" class="brand-logo"><img src="http://ki.se/sites/all/themes/ki/images/open_graph.png" style="height:70px;line-height:64px;"/></a>
+		<a id="logo-container" href="{% url 'app_home' %}" class="brand-logo"><img src="http://ki.se/sites/all/themes/ki/images/open_graph.png" style="height:70px;line-height:64px;"/></a>
       <ul class="right hide-on-med-and-down">
         {% include "app/navmenu.html" %}
       </ul>

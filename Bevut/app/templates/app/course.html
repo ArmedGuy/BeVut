@@ -16,7 +16,7 @@
         <tbody>
             {% for f in student_forms %}
             <tr>
-                <td><a href="/app/form/{{ f.id }}">{{ f.student.name }}</a></td>
+				<td><a href="{% url 'student_form' f.id %}">{{ f.student.name }}</a></td>
                 <td>{{f.student.ssn}}</td>
                 <td>{% if f.has_midterm %}Ja{%else%}Nej{% endif %}</td>
                 <td>{% if f.has_fullterm %}Ja{%else%}Nej{% endif %}</td>
