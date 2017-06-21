@@ -13,12 +13,14 @@ import app.views
 from django.conf.urls import include
 from django.contrib import admin
 import Bevut.admin
+
 admin.autodiscover()
 
 urlpatterns = [
     # Examples:
     url(r'^$', app.views.home, name='home'),
     url(r'^app/$', app.views.courses, name='app_home'),
+    url(r'^app/course/$', app.views.courses, name="courses"),
     url(r'^app/course/(?P<id>[0-9]+)/$', app.views.course, name='course'),
     url(r'^app/form/(?P<id>[0-9]+)/$', app.views.student_form, name='student_form'),
     url(r'^login/$',

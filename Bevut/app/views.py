@@ -5,6 +5,7 @@ Definition of views.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest
 from django.template import RequestContext
+from django.urls import reverse
 from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from app.models import Course, StudentForm, FormAnswer
@@ -13,12 +14,12 @@ def home(request):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
     if request.user.is_authenticated:
-        return redirect("/app")
-    return redirect("/login")
+        return redirect(reverse("courses"))
+    return redirect(reverse("login"))
 
 @login_required
 def courses(request):
-    courses = Course.objects.filter()
+    courses = Course.objects.all()
     return render(request, "app/index.html", { "courses": courses })
 
 @login_required
