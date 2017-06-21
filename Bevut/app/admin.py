@@ -55,6 +55,9 @@ class TemplateAdmin(admin.ModelAdmin):
             template.course = course
             template.applied = True
             template.save()
+            if course.students.count() == 0:
+                self.message_user(request, "Kan ej applicera mall på kurs utan studenter", ERROR)
+                return redirect("/admin/app/formtemplate")
             for student in course.students.all():
                 sf = StudentForm(student=student, course=course, template=template, midterm_signed=False, fullterm_signed=False, locked=False)
                 sf.save()
