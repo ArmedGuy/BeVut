@@ -13,6 +13,7 @@ User.__str__ = lambda self: "%s %s" % (self.first_name, self.last_name)
 class Student(models.Model):
     name = models.CharField("Namn", max_length=256)
     ssn = models.CharField("Personnummer", max_length=18)
+    email = models.EmailField("Email")
     deleted = models.BooleanField("Borttagen", default=False)
 
     def __str__(self):
