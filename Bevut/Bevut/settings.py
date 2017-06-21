@@ -26,7 +26,7 @@ SECRET_KEY = 'b159bb3d-87dc-4a4d-b33f-80c91a0be656'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["bevut-dev.re3-labs.net", "localhost"]
+ALLOWED_HOSTS = ["bevut-dev.re3-labs.net", "localhost", "127.0.0.1"]
 
 
 # Application definition
