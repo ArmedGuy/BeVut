@@ -9,6 +9,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.utils.html import format_html
 from django.forms import TextInput, Textarea
 from django.contrib.messages import ERROR, SUCCESS, INFO
+from django.db import IntegrityError
 
 from app.models import *
 import Bevut.admin
@@ -122,22 +123,34 @@ class StudentAdmin(admin.ModelAdmin):
                 if True in [file.name.endswith(d) for d in [".csv", ".xls", ".xlsx"]]:
                     file.open()
                     added = 0
+                    already_existed = []
                     for row in csv.reader(codecs.iterdecode(file, 'utf-8')):
                         if len(row) < 3:
                             continue
 
-                        name = row[0]
-                        ssn = row[1]
+                        ssn = row[0]
+                        name = row[1]
                         email = row[2]
                         s = Student()
                         s.name = name
                         s.ssn = ssn
                         s.email = email
 
-                        s.save()
-                        added += 1
+                        try:
+                            s.save()
+                            added += 1
+                        except IntegrityError as ie:
+                            already_existed.append(ssn)
 
-                    self.message_user(request, "La till {} studenter.".format(added))
+
+                    if added == 0:
+                        self.message_user(request, "Inga studenter lades till.", ERROR)
+                    else:
+                        self.message_user(request, "La till {} student(er).".format(added))
+
+                    if len(already_existed) > 0:
+                        self.message_user(request, "{} student(er) fanns redan ({})".format(len(already_existed), ", ".join(already_existed)), ERROR)
+
                     return redirect(reverse("admin:app_student_changelist"))
                 else:
                     self.message_user(request, "Filen är ej en csv fil", ERROR)

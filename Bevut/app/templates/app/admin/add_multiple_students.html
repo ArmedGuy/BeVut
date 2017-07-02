@@ -7,6 +7,7 @@
 		<form method="POST" enctype="multipart/form-data">
 			{% csrf_token %}
 			<input type="file" name="csv_file" accept=".csv, .xls, .xlsx, text/comma-separated-values, text/csv, application/csv, application/excel, application/vnd.ms-excel, application/vnd.msexcel, text/anytext" required>
+			<br>
 			<input type="submit" class="button default" value="Lägg till studenter">
 		</form>
 	</div>
