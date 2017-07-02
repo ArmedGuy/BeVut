@@ -1,11 +1,19 @@
+import csv
+import codecs
+
 from django.contrib import admin
 from django.conf.urls import url
-import Bevut.admin
+from django.urls import reverse
+from django import forms
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils.html import format_html
 from django.forms import TextInput, Textarea
 from django.contrib.messages import ERROR, SUCCESS, INFO
+
 from app.models import *
+import Bevut.admin
+
+
 class OptionInline(admin.TabularInline):
     model = FormOption
     extra = 1
@@ -31,7 +39,7 @@ class TemplateAdmin(admin.ModelAdmin):
 
     def apply_template_link(self, obj):
         if(obj.applied != True):
-            return format_html('<a href="/admin/app/formtemplate/{}/apply/">Applicera formulär på kurs</a>', obj.id)
+            return format_html('<a href="{}">Applicera formulär på kurs</a>', reverse("admin:apply_form", args=(obj.id,)))
         else:
             return 'Formuläret är redan applicerat'
 
@@ -43,7 +51,7 @@ class TemplateAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(TemplateAdmin, self).get_urls()
         template_urls = [
-            url(r'^(?P<template_id>[0-9]+)/apply/$', self.admin_site.admin_view(self.apply_template)),
+            url(r'^(?P<template_id>[0-9]+)/apply/$', self.admin_site.admin_view(self.apply_template), name="apply_form"),
         ]
         return template_urls + urls
 
@@ -55,14 +63,18 @@ class TemplateAdmin(admin.ModelAdmin):
             template.course = course
             template.applied = True
             template.save()
+
+           # TODO: get app name and template name for dynamic assignment
+            form_url = reverse("admin:app_formtemplate_changelist")
+
             if course.students.count() == 0:
                 self.message_user(request, "Kan ej applicera mall på kurs utan studenter", ERROR)
-                return redirect("/admin/app/formtemplate")
+                return redirect(form_url)
             for student in course.students.all():
                 sf = StudentForm(student=student, course=course, template=template, midterm_signed=False, fullterm_signed=False, locked=False)
                 sf.save()
             self.message_user(request, "Applicerade formulär på kursen %s" % course.name)
-            return redirect("/admin/app/formtemplate")
+            return redirect(form_url)
         else:
             
             courses = Course.objects.filter(form_templates=None)
@@ -87,9 +99,56 @@ class TemplateAdmin(admin.ModelAdmin):
                 return
         return super(TemplateAdmin, self).save_formset(request, form, formset, change)
 
+
+class MultipleStudentForm(forms.Form):
+    csv_file = forms.FileField()
+
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    pass
+
+    def get_urls(self):
+        urls = super(StudentAdmin, self).get_urls()
+        student_urls = [
+            url(r"^add-multiple", self.admin_site.admin_view(self.add_multiple_students), name="add_multiple_students"),
+        ]
+        return urls + student_urls
+
+
+    def add_multiple_students(self, request, *args, **kwargs):
+        if request.method == "POST":
+            form = MultipleStudentForm(request.POST, request.FILES)
+            if form.is_valid():
+                file = request.FILES["csv_file"]
+                if True in [file.name.endswith(d) for d in [".csv", ".xls", ".xlsx"]]:
+                    file.open()
+                    added = 0
+                    for row in csv.reader(codecs.iterdecode(file, 'utf-8')):
+                        if len(row) < 3:
+                            continue
+
+                        name = row[0]
+                        ssn = row[1]
+                        email = row[2]
+                        s = Student()
+                        s.name = name
+                        s.ssn = ssn
+                        s.email = email
+
+                        s.save()
+                        added += 1
+
+                    self.message_user(request, "La till {} studenter.".format(added))
+                    return redirect(reverse("admin:app_student_changelist"))
+                else:
+                    self.message_user(request, "Filen är ej en csv fil", ERROR)
+            else:
+                self.message_user(request, "Formuläret är ej giltigt.", ERROR)
+
+        context = dict(
+                self.admin_site.each_context(request),
+                title = "Lägg till studenter från csv fil",
+                )
+        return render(request, "app/admin/add_multiple_students.html", context)
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):

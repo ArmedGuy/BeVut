@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+{% block extrastyle %}<link rel="stylesheet" type="text/css" href="/static/admin/css/changelist.css">{% endblock %}
+{% block bodyclass %}dashboard{% endblock %}
+{% block content %}
+<div id="content-main">
+	<div id="changelist" class="module">
+		<form method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+			<input type="file" name="csv_file" accept=".csv, .xls, .xlsx, text/comma-separated-values, text/csv, application/csv, application/excel, application/vnd.ms-excel, application/vnd.msexcel, text/anytext" required>
+			<input type="submit" class="button default" value="Lägg till studenter">
+		</form>
+	</div>
+</div>
+{% endblock %}
