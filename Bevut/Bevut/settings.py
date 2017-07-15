@@ -130,3 +130,5 @@ LOGIN_REDIRECT_URL = "courses"
 LOGIN_URL = "courses"
 
 ATOMIC_REQUESTS = True
+
+# vi: ts=4 expandtab

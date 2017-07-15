@@ -2,7 +2,6 @@
 Definition of urls for Bevut.
 """
 
-from datetime import datetime
 from django.conf.urls import url
 import django.contrib.auth.views
 
@@ -12,7 +11,6 @@ import app.views
 # Uncomment the next lines to enable the admin:
 from django.conf.urls import include
 from django.contrib import admin
-import Bevut.admin
 
 admin.autodiscover()
 
@@ -42,3 +40,5 @@ urlpatterns = [
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 ]
+
+# vi: ts=4 expandtab
