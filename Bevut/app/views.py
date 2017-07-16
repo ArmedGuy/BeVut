@@ -37,15 +37,19 @@ def student_form(request, *args, **kwargs):
     ctx = {}
     form = get_object_or_404(StudentForm, pk=kwargs['id'])
     ctx['student_form'] = form
+    ctx['current_answers'] = {}
     ctx['midterm_answers'] = {}
     for a in form.formanswer_set.filter(is_midterm=True):
         ctx['midterm_answers'][a.option.id] = a.result
+        ctx['current_answers'][a.option.id] = a.result
     ctx['fullterm_answers'] = {}
     for a in form.formanswer_set.filter(is_midterm=False):
         ctx['fullterm_answers'][a.option.id] = a.result
+        ctx['current_answers'][a.option.id] = a.result
     ctx['midterm_in_progress'] = ("midterm" in [request.POST.get("term"),request.GET.get("term")] or len(ctx['midterm_answers']) != 0) and not form.midterm_signed
     ctx['fullterm_in_progress'] = ("fullterm" in [request.POST.get("term"),request.GET.get("term")] or len(ctx['fullterm_answers']) != 0) \
                                      and not form.fullterm_signed and not ctx['midterm_in_progress']
+    ctx['show_midterm_answer'] = not ctx['midterm_in_progress'] and (ctx['fullterm_in_progress'] and not form.fullterm_signed) or request.GET.get("show_midterm")
     if request.method == "GET":
         return render(request, "app/form.html", ctx)
     elif request.method == "POST":
@@ -53,16 +57,15 @@ def student_form(request, *args, **kwargs):
             return render(request, "app/form.html", ctx)
         for opt in form.template.formoption_set.all():
             if not request.POST.get(str(opt.id), False):
-                print(request.POST.get(opt.id))
                 continue
             res = request.POST.get(str(opt.id))
             if ctx['midterm_in_progress']:
-                print("midterm in progress")
                 answer = form.formanswer_set.filter(option=opt, is_midterm=True).first()
                 if answer == None:
                     answer = FormAnswer(option=opt, form=form, is_midterm=True)
                 answer.result = res
                 ctx['midterm_answers'][opt.id] = res
+                ctx['current_answers'][opt.id] = res
                 answer.save()
             elif ctx['fullterm_in_progress']:
                 answer = form.formanswer_set.filter(option=opt, is_midterm=False).first()
@@ -70,6 +73,7 @@ def student_form(request, *args, **kwargs):
                     answer = FormAnswer(option=opt, form=form, is_midterm=False)
                 answer.result = res
                 ctx['fullterm_answers'][opt.id] = res
+                ctx['current_answers'][opt.id] = res
                 answer.save()
         if request.POST.get("sign"):
             if ctx['midterm_in_progress']:
@@ -80,4 +84,5 @@ def student_form(request, *args, **kwargs):
         ctx['midterm_in_progress'] = ("midterm" in [request.POST.get("term"),request.GET.get("term")] or len(ctx['midterm_answers']) != 0) and not form.midterm_signed
         ctx['fullterm_in_progress'] = ("fullterm" in [request.POST.get("term"),request.GET.get("term")] or len(ctx['fullterm_answers']) != 0) \
                                      and not form.fullterm_signed and not ctx['midterm_in_progress']
+        ctx['show_midterm_answer'] = not ctx['midterm_in_progress'] and (ctx['fullterm_in_progress'] and not form.fullterm_signed) or request.GET.get("show_midterm")
         return render(request, "app/form.html", ctx)
