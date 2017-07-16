@@ -22,7 +22,7 @@
         $(".answer-box")
             .click(function() {
                 $box = $(this);
-                $box.parent().find(".answer-box").removeClass("result-OK result-G result-V result-U result-VG");
+                $box.parent().find(".answer-box").removeClass("result-OK result-G result-V result-U result-VG").addClass("collapsed");
                 var ans = $box.data("answer");
                 {% if midterm_in_progress %}
                 if (ans == "G")
@@ -208,7 +208,7 @@
                     {% endif %}
                 <div class="number-box">{{question.nr}}</div>
                 <p class="flow-text">{{ question.description }}</p>
-                <div data-answer="G" class="card-panel grey lighten-5 collapsed answer-box{% if show_midterm_answer and midterm_answers|get_item:question.id == "OK"%} result-OK{%endif%}{% if answer == "OK" %} result-OK{%endif%}{% if answer == "G" %} result-G{%endif%}">
+                <div data-answer="G" class="card-panel grey lighten-5 answer-box{% if show_midterm_answer and midterm_answers|get_item:question.id == "OK"%} result-OK{%endif%}{% if answer == "OK" %} result-OK{%endif%}{% if answer == "G" %} result-G{%endif%}{% if answer %} collapsed{% endif %}">
                     <div class="row">
                         <div class="col m4 s12 flow-text select">
                             Godkänt
@@ -218,7 +218,7 @@
                     </div>
                 </div>
                 {% if student_form.template.has_well_done and not midterm_in_progress %}
-                <div data-answer="VG" class="card-panel grey lighten-5 answer-box{% if answer == "VG" %} result-VG{%endif%}">
+                <div data-answer="VG" class="card-panel grey lighten-5 answer-box{% if answer == "VG" %} result-VG{%endif%}{% if answer %} collapsed{% endif %}">
                     <div class="row">
                         <div class="col m4 s12 flow-text select">
                             Väl godkänt
@@ -228,7 +228,7 @@
                     </div>
                 </div>
                 {% endif %}
-                <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V"%} result-V{%endif%}{% if answer == "V" %} result-V{%endif%}{% if answer == "U" %} result-U{%endif%}">
+                <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V"%} result-V{%endif%}{% if answer == "V" %} result-V{%endif%}{% if answer == "U" %} result-U{%endif%}{% if answer %} collapsed{% endif %}">
                     <div class="row">
                         <div class="col m4 s12 flow-text select">
                             Underkänt
