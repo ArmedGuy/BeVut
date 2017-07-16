@@ -15,7 +15,7 @@
         <tbody>
             {% for c in courses %}
             <tr>
-                <td><a href="/app/course/{{c.id}}">{{ c.name }}</a></td>
+				<td><a href="{% url 'course' c.id %}">{{ c.name }}</a></td>
                 <td>{{c.year}}</td>
                 <td>{{c.term}}</td>
                 <td>{{c.weeks}}v</td>
