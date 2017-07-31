@@ -115,6 +115,8 @@ class MultipleStudentForm(forms.Form):
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
 
+    exclude = ('identity',)
+
     def get_urls(self):
         urls = super(StudentAdmin, self).get_urls()
         student_urls = [
@@ -171,6 +173,7 @@ class StudentAdmin(admin.ModelAdmin):
                 self.admin_site.each_context(request),
                 title="Lägg till studenter från csv fil",
                 )
+
         return render(request, "app/admin/add_multiple_students.html", context)
 
 

@@ -2,9 +2,13 @@
 Definition of models.
 """
 
-from django.db import models
+from hashlib import sha256
 
+from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
 # Create your models here.
 
 User.__str__ = lambda self: "%s %s" % (self.first_name, self.last_name)
@@ -15,6 +19,7 @@ class Student(models.Model):
     ssn = models.CharField("Personnummer", max_length=18, unique=True)
     email = models.EmailField("Email", unique=True)
     deleted = models.BooleanField("Borttagen", default=False)
+    identity = models.CharField("Identitet", unique=True, max_length=64)
 
     def __str__(self):
         return self.name
@@ -22,6 +27,14 @@ class Student(models.Model):
     class Meta:
         verbose_name = "student"
         verbose_name_plural = "studenter"
+
+
+# Could probaby override save function but this is more cool
+@receiver(pre_save, sender=Student)
+def studnet_ssn_hash(sender, instance, *args, **kwargs):
+    h = sha256()
+    h.update(instance.ssn.encode('utf-8'))
+    instance.identity = h.hexdigest()
 
 
 TERM_CHOICES = (
