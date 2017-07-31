@@ -183,8 +183,15 @@
                 <label for="ssn">Personnummer - kan ej ändras här</label>
             </div>
             <div class="input-field">
+                <input id="handler" type="text" name="handler" class="validate" value="{{ student_form.location }}">
+                <label for="handler">Handledare/ansvarig</label>
+            </div>
+            <div class="input-field">
                 <input id="location" type="text" name="location" class="validate" value="{{ student_form.location }}">
                 <label for="location">VFU-placering</label>
+            </div>
+             <div class="input-field">
+                <input type="submit" value="Uppdatera" class="btn-large"/>
             </div>
         </div>
         <h3>Bedömning</h3>
@@ -245,26 +252,72 @@
         {% if midterm_in_progress %}
         <div class="card-panel grey lighten-5">
             <h4>Halvtidsbedömning</h4>
-            <input type="hidden" name="term" value="midterm"/>
-            <p>
-                <input type="checkbox" name="sign" id="sign" value="true"/>
-                <label for="sign">Slutför och signera halvtidsbedömning</label>
-            </p>
-            <div class="input-field">
-                <input type="submit" value="Uppdatera" class="btn-large"/>
+            <div class="row">
+                <div class="col s12 m6">
+                    <div class="input-field">
+                        <input id="sign_date" type="text" name="sign_date" class="validate" value="">
+                        <label for="sign_date">Datum för signering</label>
+                    </div>
+                    <div class="input-field">
+                        <input id="absence" type="text" name="absence" class="validate" value="">
+                        <label for="absence">Frånvaro (antal dagar)</label>
+                    </div>
+                </div>
+                <div class="col s12 m6">
+                    <input type="hidden" name="term" value="midterm"/>
+                    <p>
+                        <input type="checkbox" name="sign" id="sign" value="true"/>
+                        <label for="sign">Slutför och signera halvtidsbedömning</label>
+                    </p>
+                    <div class="input-field">
+                        <input type="submit" value="Uppdatera" class="btn-large"/>
+                    </div>
+                </div>
             </div>
         </div>
         {% endif %}
         {% if fullterm_in_progress %}
         <div class="card-panel grey lighten-5">
             <h4>Heltidsbedömning</h4>
-            <input type="hidden" name="term" value="fullterm"/>
-            <p>
-                <input type="checkbox" name="sign" id="sign" value="true"/>
-                <label for="sign">Slutför och signera heltidsbedömning</label>
-            </p>
-            <div class="input-field">
-                <input type="submit" value="Uppdatera" class="btn-large"/>
+            <div class="row">
+                <div class="col s12 m6">
+                    <div class="input-field">
+                        <input id="sign_date" type="text" name="sign_date" class="validate" value="">
+                        <label for="sign_date">Datum för signering</label>
+                    </div>
+                    <div class="input-field">
+                        <input id="absence" type="text" name="absence" class="validate" value="">
+                        <label for="absence">Frånvaro (antal dagar)</label>
+                    </div>
+                    <div class="input-field">
+                        <input id="ok_absence" type="text" name="ok_absence" class="validate" value="">
+                        <label for="ok_absence">Från lärosätet godkänd frånvaro (antal dagar)</label>
+                    </div>
+                </div>
+                <div class="col s12 m6">
+                    <div class="signers">
+                        <div class="signer">
+                            <div class="input-field">
+                                <input id="signer1" type="text" name="signer" class="validate" value="">
+                                <label for="signer1">Namn på person</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12">
+                    <div class="input-field">
+                        <textarea id="textarea1" class="materialize-textarea"></textarea>
+                        <label for="textarea1">Textarea</label>
+                    </div>
+                    <input type="hidden" name="term" value="fullterm"/>
+                    <p>
+                        <input type="checkbox" name="sign" id="sign" value="true"/>
+                        <label for="sign">Slutför och signera heltidsbedömning</label>
+                    </p>
+                    <div class="input-field">
+                        <input type="submit" value="Uppdatera" class="btn-large"/>
+                    </div>
+                </div>
             </div>
         </div>
         {% endif %}
