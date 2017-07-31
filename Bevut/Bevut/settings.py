@@ -124,3 +124,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = posixpath.join(*(BASE_DIR.split(os.path.sep) + ['static']))
+
+# Redirect url after login
+LOGIN_REDIRECT_URL = "courses"
+LOGIN_URL = "courses"
+
+ATOMIC_REQUESTS = True
+
+# vi: ts=4 expandtab
