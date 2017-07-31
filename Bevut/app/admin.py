@@ -1,5 +1,6 @@
 import csv
 import codecs
+import re
 
 from django.contrib import admin
 from django.conf.urls import url
@@ -10,6 +11,8 @@ from django.utils.html import format_html
 from django.forms import Textarea
 from django.contrib.messages import ERROR
 from django.db import IntegrityError, models
+from django.core.exceptions import ValidationError
+from django.http import HttpResponse
 
 from app.models import Student, Course, FormTemplate, FormOption, StudentForm
 
@@ -125,6 +128,8 @@ class StudentAdmin(admin.ModelAdmin):
         return urls + student_urls
 
     def add_multiple_students(self, request, *args, **kwargs):
+        course_id = request.POST.get('course_id', '') if request.method == 'POST' else request.GET.get('course', '')
+        course = Course.objects.filter(id=course_id).first() if re.match('^[0-9]+$', course_id) else None
         if request.method == "POST":
             form = MultipleStudentForm(request.POST, request.FILES)
             if form.is_valid():
@@ -144,12 +149,18 @@ class StudentAdmin(admin.ModelAdmin):
                         s.name = name
                         s.ssn = ssn
                         s.email = email
+                        s.populate_hash()
 
                         try:
+                            s.full_clean()
                             s.save()
                             added += 1
+                            if course is not None:
+                                course.students.add(s)
                         except IntegrityError:
                             already_existed.append(ssn)
+                        except ValidationError as ve:
+                            self.message_user(request, "{}: {}".format(s.ssn, ", ".join(ve.messages)), ERROR)
 
                     if added == 0:
                         self.message_user(request, "Inga studenter lades till.", ERROR)
@@ -163,7 +174,10 @@ class StudentAdmin(admin.ModelAdmin):
                                     len(already_existed),
                                     ", ".join(already_existed)), ERROR)
 
-                    return redirect(reverse("admin:app_student_changelist"))
+                    if course is None:
+                        return redirect(reverse("admin:app_student_changelist"))
+
+                    return redirect(reverse("admin:app_course_change", args=(course.id,)))
                 else:
                     self.message_user(request, "Filen är ej en csv fil", ERROR)
             else:
@@ -172,7 +186,7 @@ class StudentAdmin(admin.ModelAdmin):
         context = dict(
                 self.admin_site.each_context(request),
                 title="Lägg till studenter från csv fil",
-                )
+                course=course)
 
         return render(request, "app/admin/add_multiple_students.html", context)
 
@@ -182,6 +196,29 @@ class CourseAdmin(admin.ModelAdmin):
     save_as = True
     radio_fields = {'term': admin.HORIZONTAL}
     filter_horizontal = ['students']
+    list_display = ["__str__", "import_students_str"]
+
+    def import_students_str(self, obj):
+        return format_html(
+                '<a href="{}?course={}">Importera studenter till kursen</a>',
+                # reverse("admin:course_import_students", kwargs=dict(course_id=obj.id)))
+                reverse("admin:add_multiple_students"),
+                obj.id)
+
+    import_students_str.short_description = "Importera"
+
+    def get_urls(self):
+        urls = super(CourseAdmin, self).get_urls()
+        template_urls = [
+            url(
+                r'^(?P<course_id>[0-9]+)/import/$',
+                self.admin_site.admin_view(self.import_students),
+                name="course_import_students"),
+        ]
+        return template_urls + urls
+
+    def import_students(self, request, *args, **kwargs):
+        return HttpResponse('swag')
 
 
 admin.site.disable_action('delete_selected')

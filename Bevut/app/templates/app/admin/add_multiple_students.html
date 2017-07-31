@@ -7,6 +7,9 @@
 		<form method="POST" enctype="multipart/form-data">
 			{% csrf_token %}
 			<input type="file" name="csv_file" accept=".csv, .xls, .xlsx, text/comma-separated-values, text/csv, application/csv, application/excel, application/vnd.ms-excel, application/vnd.msexcel, text/anytext" required>
+			{% if course is not None %}
+			<input type="hidden" name="course_id" value="{{ course.id }}">
+			{% endif %}
 			<br>
 			<input type="submit" class="button default" value="Lägg till studenter">
 		</form>

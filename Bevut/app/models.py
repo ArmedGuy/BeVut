@@ -8,6 +8,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.core.validators import RegexValidator
 
 # Create your models here.
 
@@ -16,13 +17,22 @@ User.__str__ = lambda self: "%s %s" % (self.first_name, self.last_name)
 
 class Student(models.Model):
     name = models.CharField("Namn", max_length=256)
-    ssn = models.CharField("Personnummer", max_length=18, unique=True)
+    ssn = models.CharField("Personnummer", unique=True, max_length=12, validators=[
+        RegexValidator(
+            regex='^[0-9]{12}$',
+            message='Personnumret måste vara tolv siffror utan bindesstreck (Ex. 197001010000)',
+            code='nomatch')])
     email = models.EmailField("Email", unique=True)
     deleted = models.BooleanField("Borttagen", default=False)
     identity = models.CharField("Identitet", unique=True, max_length=64)
 
     def __str__(self):
         return self.name
+
+    def populate_hash(self):
+        h = sha256()
+        h.update(self.ssn.encode('utf-8'))
+        self.identity = h.hexdigest()
 
     class Meta:
         verbose_name = "student"
@@ -32,9 +42,8 @@ class Student(models.Model):
 # Could probaby override save function but this is more cool
 @receiver(pre_save, sender=Student)
 def studnet_ssn_hash(sender, instance, *args, **kwargs):
-    h = sha256()
-    h.update(instance.ssn.encode('utf-8'))
-    instance.identity = h.hexdigest()
+    if instance.identity is None:
+        instance.populate_hash()
 
 
 TERM_CHOICES = (
