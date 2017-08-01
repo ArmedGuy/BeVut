@@ -115,9 +115,17 @@ class StudentForm(models.Model):
     student = models.ForeignKey(Student)
     course = models.ForeignKey(Course, related_name="student_forms", null=True)
     template = models.ForeignKey(FormTemplate)
+    handler = models.CharField("Handledare/ansvarig", max_length=256, blank=True)
     location = models.CharField("VFU-placering", max_length=256, blank=True)
     midterm_signed = models.BooleanField("Halvtidsbedömning gjord", default=False)
     fullterm_signed = models.BooleanField("Heltidsbedömning gjord", default=False)
+    midterm_signed_date = models.DateTimeField("Datum för halvtidsbedömining", null=True)
+    fullterm_signed_date = models.DateTimeField("Datum för heltidsbedömning", null=True)
+    midterm_comments = models.TextField("Kommentarer vid halvtidsbedömning", blank=True)
+    fullterm_comments = models.TextField("Kommentarer vid heltidbedömning", blank=True)
+    midterm_absence = models.CharField("Frånvaro vid halvtidsbedömning", max_length=10, blank=True)
+    fullterm_absence = models.CharField("Frånvaro vid heltidsbedömning", max_length=10, blank=True)
+    fullterm_ok_absence = models.CharField("OK Frånvaro vid heltidsbedömning", max_length=10, blank=True)
     locked = models.BooleanField("Låst", default=False)
 
     def __str__(self):
@@ -131,8 +139,8 @@ class StudentForm(models.Model):
 class FormSigningAttendance(models.Model):
     title = models.CharField("Titel/befattning", max_length=256)
     name = models.CharField("Namn", max_length=256)
-    midterm_sign = models.ForeignKey(StudentForm, related_name="midterm_user_signed")
-    term_sign = models.ForeignKey(StudentForm, related_name="fullterm_user_signed")
+    midterm_sign = models.ForeignKey(StudentForm, related_name="midterm_user_signed", null=True)
+    fullterm_sign = models.ForeignKey(StudentForm, related_name="fullterm_user_signed", null=True)
 
     class Meta:
         verbose_name = "signerat namn"
