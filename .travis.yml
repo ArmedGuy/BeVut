@@ -11,7 +11,8 @@ install:
     - "pip install flake8"
 
 script:
-    - "find Bevut/ -name \\*.py -exec flake8 --max-line-length 120 {} +"
+    - "find Bevut/Bevut -name \\*.py -exec flake8 --max-line-length 120 {} +"
+    - "find Bevut/app -not -path \"Bevut/app/migrations/*\" -name \\*.py -exec flake8 --max-line-length 120 {} +"
     - "python Bevut/manage.py migrate"
     - "python Bevut/manage.py test"
 
