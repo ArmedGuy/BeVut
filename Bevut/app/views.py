@@ -8,6 +8,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, Http404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from app.models import Course, StudentForm, FormAnswer, FormSigningAttendance
+from datetime import datetime
 from django.views.decorators.http import require_GET
 
 from app.models import Course, StudentForm, FormAnswer
@@ -43,6 +45,7 @@ def course(request, *args, **kwargs):
 def student_form(request, *args, **kwargs):
     ctx = {}
     form = get_object_or_404(StudentForm, pk=kwargs['id'])
+    ctx['todays_date'] = datetime.today().strftime('%Y-%m-%d')
     ctx['student_form'] = form
     ctx['current_answers'] = {}
     ctx['midterm_answers'] = {}
@@ -97,10 +100,32 @@ def student_form(request, *args, **kwargs):
         if request.POST.get("sign"):
             if ctx['midterm_in_progress']:
                 form.midterm_signed = True
+                form.midterm_signed_date = datetime.today()
+                names = request.POST.getlist("signer_name")
+                positions = request.POST.getlist("signer_position")
+                for i in range(len(names)):
+                    attendee = FormSigningAttendance(title=positions[i], name=names[i], midterm_sign=form)
+                    attendee.save()
+                
             if ctx['fullterm_in_progress']:
                 form.fullterm_signed = True
-            form.save()
-
+                form.fullterm_signed_date = datetime.today()
+                names = request.POST.getlist("signer_name")
+                positions = request.POST.getlist("signer_position")
+                for i in range(len(names)):
+                    attendee = FormSigningAttendance(title=positions[i], name=names[i], fullterm_sign=form)
+                    attendee.save()
+                
+        if ctx['midterm_in_progress']:
+            form.midterm_comments = request.POST.get("comments", "")
+            form.midterm_absence = request.POST.get("absence", "")
+        if ctx['fullterm_in_progress']:
+            form.fullterm_comments = request.POST.get("comments", "")
+            form.fullterm_absence = request.POST.get("absence", "")
+            form.fullterm_ok_absence = request.POST.get("ok_absence", "")
+        form.handler = request.POST.get("handler")
+        form.location = request.POST.get("location")
+        form.save()
         ctx['midterm_in_progress'] = (
                 "midterm" in [
                     request.POST.get("term"),

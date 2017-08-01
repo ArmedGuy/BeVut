@@ -10,5 +10,6 @@ install:
     - "pip install -r Bevut/requirements.txt"
 
 script:
-    - "python Bevut/Bevut/manage.py test"
+    - "find Bevut/ -name \\*.py -exec flake8 --max-line-length 120 {} +"
+    - "python Bevut/manage.py test"
 

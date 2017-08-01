@@ -1,8 +1,31 @@
 {% extends "app/app_layout.html" %}
 {% load dict_tags %}
 {% block scripts %}
+<script type="text/template" id="signer-template">
+    <div class="signer">
+        <div class="row">
+            <div class="col s6">
+                <div class="input-field">
+                    <input id="signer_name%{num}" type="text" name="signer_name" class="validate" value="">
+                    <label for="signer_name%{num}">Namn på person</label>
+                </div>
+            </div>
+            <div class="col s5">
+                <div class="input-field">
+                    <input id="signer_position%{num}" type="text" name="signer_position" class="validate" value="">
+                    <label for="signer_position%{num}">Befattning</label>
+                </div>
+            </div>
+            <div class="col s1">
+                <div class="delete-btn"><i class="material-icons">close</i>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
 <script>
     $(function() {
+        $signerTemplate = $("#signer-template").html();
         $(".results input[type=hidden]")
             .each(function() {
                 var value = $(this).val();
@@ -18,6 +41,24 @@
                 $(this).addClass("selected");
             });
         var $state = $("#state-holder");
+        $state.on("click",
+            ".delete-btn",
+            function() {
+                $(this).parent().parent().parent().remove();
+            });
+        $("#add_user")
+            .click(function(e) {
+                e.preventDefault();
+                $(".signers").append($signerTemplate);
+            });
+        $("#sign")
+            .click(function() {
+                if ($(this).is(":checked")) {
+                    $(".signing").show();
+                } else {
+                    $(".signing").hide();
+                }
+            });
         {% if midterm_in_progress or fullterm_in_progress %}
         $(".answer-box")
             .click(function() {
@@ -60,6 +101,7 @@
     .answer-box {
         padding: 10px;
         cursor: pointer;
+        border: 6px solid transparent;
     }
     .answer-box.collapsed .description {
         display: none;
@@ -102,6 +144,10 @@
     .result-VG {
         border:6px solid #01579b;
     }
+    .delete-btn {
+        padding-top: 20px;
+        cursor: pointer;
+    }
     .help-midterm {
         border-top: 6px dashed #da6464;
         border-left: 6px dashed #da6464;
@@ -131,6 +177,15 @@
         margin: 5px;
         margin-top: 2px;
     }
+    .signing {
+        display: none;
+    }
+    #add_user i.small {
+        font-size: 1.2rem;
+    }
+    p.checkbox {
+        margin-bottom: 30px;
+    }
     /*table tbody tr:nth-child(even) td:nth-child(odd) {
         background-color: #eee;
         
@@ -143,26 +198,82 @@
         padding: 0px;
         padding-bottom: 10px;
     }
+    input:disabled:not([type]),
+    input[readonly="readonly"]:not([type]),
+    input[type="text"]:disabled,
+    input[type="text"][readonly="readonly"],
+    input[type="password"]:disabled, input[type="password"][readonly="readonly"],
+    input[type="email"]:disabled, input[type="email"][readonly="readonly"],
+    input[type="url"]:disabled, input[type="url"][readonly="readonly"],
+    input[type="time"]:disabled, input[type="time"][readonly="readonly"],
+    input[type="date"]:disabled, input[type="date"][readonly="readonly"],
+    input[type="datetime"]:disabled, input[type="datetime"][readonly="readonly"],
+    input[type="datetime-local"]:disabled, input[type="datetime-local"][readonly="readonly"],
+    input[type="tel"]:disabled, input[type="tel"][readonly="readonly"],
+    input[type="number"]:disabled, input[type="number"][readonly="readonly"],
+    input[type="search"]:disabled, input[type="search"][readonly="readonly"],
+    textarea.materialize-textarea:disabled, textarea.materialize-textarea[readonly="readonly"] {
+        color: rgba(0, 0, 0, 0.56);
+    }
+    input:disabled:not([type]) + label, input[readonly="readonly"]:not([type]) + label,
+    input[type="text"]:disabled + label, input[type="text"][readonly="readonly"] + label,
+    input[type="password"]:disabled + label, input[type="password"][readonly="readonly"] + label,
+    input[type="email"]:disabled + label, input[type="email"][readonly="readonly"] + label,
+    input[type="url"]:disabled + label, input[type="url"][readonly="readonly"] + label,
+    input[type="time"]:disabled + label, input[type="time"][readonly="readonly"] + label,
+    input[type="date"]:disabled + label, input[type="date"][readonly="readonly"] + label,
+    input[type="datetime"]:disabled + label, input[type="datetime"][readonly="readonly"] + label,
+    input[type="datetime-local"]:disabled + label, input[type="datetime-local"][readonly="readonly"] + label,
+    input[type="tel"]:disabled + label, input[type="tel"][readonly="readonly"] + label,
+    input[type="number"]:disabled + label, input[type="number"][readonly="readonly"] + label,
+    input[type="search"]:disabled + label, input[type="search"][readonly="readonly"] + label,
+    textarea.materialize-textarea:disabled + label, textarea.materialize-textarea[readonly="readonly"] + label {
+        color: rgba(0, 0, 0, 0.56);
+    }
 </style>
 
 <div id="state-holder" class="container {% if midterm_in_progress %}midterm{% endif %} {% if fullterm_in_progress %}fullterm{% endif %}">
     <h2>{{ student_form }}</h2>
-    <div class="row">
-        <div class="col m6 s12">
+    <form method="POST">
+    {% csrf_token %}
+        <div class="card-panel grey lighten-5">
+            <h5>Information</h5>
+            <div class="input-field">
+                <input disabled id="ssn" type="text" value="{{ student_form.student.ssn }}">
+                <label for="ssn">Personnummer</label>
+            </div>
+            <div class="input-field">
+                <input id="handler" type="text" name="handler" class="validate" value="{{ student_form.handler }}">
+                <label for="handler">Handledare/ansvarig</label>
+            </div>
+            <div class="input-field">
+                <input id="location" type="text" name="location" class="validate" value="{{ student_form.location }}">
+                <label for="location">VFU-placering</label>
+            </div>
+             <div class="input-field">
+                <input type="submit" value="Uppdatera" class="btn-large"/>
+            </div>
+        </div>
+        <h3>Bedömning</h3>
+        <div class="row">
+            <div class="col m6 s12">
+                <div class="card-panel grey lighten-5">
                 <h5>Halvtidsbedömning</h5>
                 {% if student_form.midterm_signed %}
-                <h4>Slutförd</h4>
+                <h4>Slutförd {{student_form.midterm_signed_date}}</h4>
                 {% elif midterm_in_progress %}
                 <h4>Påbörjad</h4>
                 {% else %}
                 <h4>Ej genomförd</h4>
                 <a class="waves-effect waves-light btn" href="?term=midterm">Påbörja</a>
                 {% endif %}
-        </div>
-        <div class="col m6 s12">
+                </div>
+            </div>
+            <div class="col m6 s12">
+                <div class="card-panel grey lighten-5">
                 <h5>Heltidsbedömning</h5>
                 {% if student_form.fullterm_signed %}
-                <h4>Slutförd</h4>
+                <h4>Slutförd {{student_form.fullterm_signed_date}}</h4>
                 {% elif fullterm_in_progress %}
                 <h4>Påbörjad</h4>
                 {% else %}
@@ -172,22 +283,9 @@
                 Halvtidsbedöming inte klar
                 {% endif %}
                 {% endif %}
-        </div>
-    </div>
-    <form method="POST">
-    {% csrf_token %}
-        <div class="card-panel grey lighten-5">
-            <h5>Information</h5>
-            <div class="input-field">
-                <input id="ssn" type="text" value="{{ student_form.student.ssn }}">
-                <label for="ssn">Personnummer - kan ej ändras här</label>
-            </div>
-            <div class="input-field">
-                <input id="location" type="text" name="location" class="validate" value="{{ student_form.location }}">
-                <label for="location">VFU-placering</label>
+                </div>
             </div>
         </div>
-        <h3>Bedömning</h3>
         <div class="row">
             <div class="col s6">
                 <div class="card-panel grey lighten-5 help-midterm">Vid halvtidbedömning</div>
@@ -245,26 +343,121 @@
         {% if midterm_in_progress %}
         <div class="card-panel grey lighten-5">
             <h4>Halvtidsbedömning</h4>
-            <input type="hidden" name="term" value="midterm"/>
-            <p>
-                <input type="checkbox" name="sign" id="sign" value="true"/>
-                <label for="sign">Slutför och signera halvtidsbedömning</label>
-            </p>
-            <div class="input-field">
-                <input type="submit" value="Uppdatera" class="btn-large"/>
+            <div class="row">
+                <div class="col s12">
+                    
+                    <div class="input-field">
+                        <input id="absence" type="text" name="absence" class="validate" value="{{student_form.midterm_absence}}">
+                        <label for="absence">Frånvaro (antal dagar)</label>
+                    </div>
+                    <div class="input-field">
+                        <textarea id="comments" name="comments" class="materialize-textarea">{{student_form.midterm_comments}}</textarea>
+                        <label for="comments">Övriga kommentarer</label>
+                    </div>
+                </div>
+                <div class="col s12">
+                    <input type="hidden" name="term" value="midterm"/>
+                    <p class="checkbox">
+                        <input type="checkbox" name="sign" id="sign" value="true"/>
+                        <label for="sign">Slutför och signera halvtidsbedömning</label>
+                    </p>
+                    <div class="signing">
+                        <div class="input-field">
+                            <input disabled id="sign_date" type="text" class="validate" value="{{ todays_date }}">
+                            <label for="sign_date">Datum för signering</label>
+                        </div>
+                        <h5>Närvarande vid halvtidsbedömning</h5>
+                        <div class="signers">
+                            <div class="signer">
+                                <div class="row">
+                                    <div class="col s6">
+                                        <div class="input-field">
+                                            <input id="signer_name1" type="text" name="signer_name" class="validate" value="">
+                                            <label for="signer_name1">Namn på person</label>
+                                        </div>
+                                    </div>
+                                    <div class="col s5">
+                                        <div class="input-field">
+                                            <input id="signer_position1" type="text" name="signer_position" class="validate" value="">
+                                            <label for="signer_position1">Befattning</label>
+                                        </div>
+                                    </div>
+                                    <div class="col s1">
+                                        <div class="delete-btn"><i class="material-icons">close</i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#" id="add_user"><i class="material-icons small">add</i> Lägg till fält</a>
+                    </div>
+                    <div class="input-field">
+                        <input type="submit" value="Uppdatera" class="btn-large"/>
+                    </div>
+                </div>
             </div>
         </div>
         {% endif %}
         {% if fullterm_in_progress %}
         <div class="card-panel grey lighten-5">
             <h4>Heltidsbedömning</h4>
-            <input type="hidden" name="term" value="fullterm"/>
-            <p>
-                <input type="checkbox" name="sign" id="sign" value="true"/>
-                <label for="sign">Slutför och signera heltidsbedömning</label>
-            </p>
-            <div class="input-field">
-                <input type="submit" value="Uppdatera" class="btn-large"/>
+            <div class="row">
+                <div class="col s12">
+                    <div class="input-field">
+                        <input id="absence" type="text" name="absence" class="validate" value="{{student_form.fullterm_absence}}">
+                        <label for="absence">Frånvaro (antal dagar)</label>
+                    </div>
+                    <div class="input-field">
+                        <input id="ok_absence" type="text" name="ok_absence" class="validate" value="{{student_form.fullterm_ok_absence}}">
+                        <label for="ok_absence">Från lärosätet godkänd frånvaro (antal dagar)</label>
+                    </div>
+                </div>
+                <div class="col s12 ">
+                    <div class="input-field">
+                        <textarea id="comments" name="comments" class="materialize-textarea">{{student_form.fullterm_comments}}</textarea>
+                        <label for="comments">Övriga kommentarer</label>
+                    </div>
+                </div>
+                <div class="col s12">
+                    <input type="hidden" name="term" value="fullterm"/>
+                    <p class="checkbox">
+                        <input type="checkbox" name="sign" id="sign" value="true"/>
+                        <label for="sign">Slutför och signera heltidsbedömning</label>
+                    </p>
+                    <div class="signing">
+                        <div class="input-field">
+                            <input disabled id="sign_date" type="text" class="validate" value="{{ todays_date }}">
+                            <label for="sign_date">Datum för signering</label>
+                        </div>
+                        <h5>Närvarande vid halvtidsbedömning</h5>
+                        <div class="signers">
+                            <div class="signer">
+                                <div class="row">
+                                    <div class="col s6">
+                                        <div class="input-field">
+                                            <input id="signer_name1" type="text" name="signer_name" class="validate" value="">
+                                            <label for="signer_name1">Namn på person</label>
+                                        </div>
+                                    </div>
+                                    <div class="col s5">
+                                        <div class="input-field">
+                                            <input id="signer_position1" type="text" name="signer_position" class="validate" value="">
+                                            <label for="signer_position1">Befattning</label>
+                                        </div>
+                                    </div>
+                                    <div class="col s1">
+                                        <div class="delete-btn"><i class="material-icons">close</i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#" id="add_user"><i class="material-icons small">add</i> Lägg till fält</a>
+                    </div>
+                    <div class="input-field">
+                        <input type="submit" value="Uppdatera" class="btn-large"/>
+                    </div>
+                </div>
             </div>
         </div>
         {% endif %}
