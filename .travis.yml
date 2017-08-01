@@ -8,8 +8,10 @@ python:
 
 install:
     - "pip install -r Bevut/requirements.txt"
+    - "pip install flake8"
 
 script:
     - "find Bevut/ -name \\*.py -exec flake8 --max-line-length 120 {} +"
+    - "python Bevut/manage.py migrate"
     - "python Bevut/manage.py test"
 
