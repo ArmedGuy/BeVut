@@ -2,10 +2,14 @@
 Definition of views.
 """
 
+from uuid import UUID
+
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpRequest
+from django.http import HttpRequest, Http404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
+
 from app.models import Course, StudentForm, FormAnswer
 
 
@@ -61,7 +65,9 @@ def student_form(request, *args, **kwargs):
                 request.POST.get("term"),
                 request.GET.get("term")]
             or len(ctx['fullterm_answers']) != 0) and not form.fullterm_signed and not ctx['midterm_in_progress']
-    ctx['show_midterm_answer'] = not ctx['midterm_in_progress'] and (ctx['fullterm_in_progress'] and not form.fullterm_signed) or request.GET.get("show_midterm")
+    ctx['show_midterm_answer'] = not ctx['midterm_in_progress'] and (
+            ctx['fullterm_in_progress'] and not form.fullterm_signed
+            ) or request.GET.get("show_midterm")
 
     if request.method == "GET":
         return render(request, "app/form.html", ctx)
@@ -105,6 +111,26 @@ def student_form(request, *args, **kwargs):
                     request.POST.get("term"),
                     request.GET.get("term")]
                 or len(ctx['fullterm_answers']) != 0) and not form.fullterm_signed and not ctx['midterm_in_progress']
-        ctx['show_midterm_answer'] = not ctx['midterm_in_progress'] and (ctx['fullterm_in_progress'] and not form.fullterm_signed) or request.GET.get("show_midterm")
+        ctx['show_midterm_answer'] = not ctx['midterm_in_progress'] and (
+                ctx['fullterm_in_progress'] and not form.fullterm_signed
+                ) or request.GET.get("show_midterm")
         return render(request, "app/form.html", ctx)
+
+
+@require_GET
+@login_required
+def readonly_studentform(request, *args, **kwargs):
+    studentform = None
+    try:
+        uuid = UUID(kwargs["uuid"])
+        print(uuid)
+        studentform = StudentForm.objects.filter(link_uuid=uuid).first()
+    except:
+        pass
+
+    if studentform is None:
+        raise Http404('No such form')
+
+    return render(request, 'app/readonly-studentform.html', dict(studentform=studentform))
+
 # vi: ts=4 expandtab
