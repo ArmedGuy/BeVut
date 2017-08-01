@@ -80,6 +80,7 @@ def student_form(request, *args, **kwargs):
         if request.POST.get("sign"):
             if ctx['midterm_in_progress']:
                 form.midterm_signed = True
+                form.midterm_signed_date = datetime.today()
                 names = request.POST.getlist("signer_name")
                 positions = request.POST.getlist("signer_position")
                 for i in range(len(names)):
@@ -88,6 +89,7 @@ def student_form(request, *args, **kwargs):
                 
             if ctx['fullterm_in_progress']:
                 form.fullterm_signed = True
+                form.fullterm_signed_date = datetime.today()
                 names = request.POST.getlist("signer_name")
                 positions = request.POST.getlist("signer_position")
                 for i in range(len(names)):

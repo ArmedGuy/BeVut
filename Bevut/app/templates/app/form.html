@@ -260,7 +260,7 @@
                 <div class="card-panel grey lighten-5">
                 <h5>Halvtidsbedömning</h5>
                 {% if student_form.midterm_signed %}
-                <h4>Slutförd</h4>
+                <h4>Slutförd {{student_form.midterm_signed_date}}</h4>
                 {% elif midterm_in_progress %}
                 <h4>Påbörjad</h4>
                 {% else %}
@@ -273,7 +273,7 @@
                 <div class="card-panel grey lighten-5">
                 <h5>Heltidsbedömning</h5>
                 {% if student_form.fullterm_signed %}
-                <h4>Slutförd</h4>
+                <h4>Slutförd {{student_form.fullterm_signed_date}}</h4>
                 {% elif fullterm_in_progress %}
                 <h4>Påbörjad</h4>
                 {% else %}
@@ -402,7 +402,7 @@
         <div class="card-panel grey lighten-5">
             <h4>Heltidsbedömning</h4>
             <div class="row">
-                <div class="col s12 m6">
+                <div class="col s12">
                     <div class="input-field">
                         <input id="absence" type="text" name="absence" class="validate" value="{{student_form.fullterm_absence}}">
                         <label for="absence">Frånvaro (antal dagar)</label>
@@ -412,7 +412,7 @@
                         <label for="ok_absence">Från lärosätet godkänd frånvaro (antal dagar)</label>
                     </div>
                 </div>
-                <div class="col s12 m6">
+                <div class="col s12 ">
                     <div class="input-field">
                         <textarea id="comments" name="comments" class="materialize-textarea">{{student_form.fullterm_comments}}</textarea>
                         <label for="comments">Övriga kommentarer</label>
@@ -426,7 +426,7 @@
                     </p>
                     <div class="signing">
                         <div class="input-field">
-                            <input id="sign_date" type="text" class="validate" value="{{ todays_date }}">
+                            <input disabled id="sign_date" type="text" class="validate" value="{{ todays_date }}">
                             <label for="sign_date">Datum för signering</label>
                         </div>
                         <h5>Närvarande vid halvtidsbedömning</h5>
