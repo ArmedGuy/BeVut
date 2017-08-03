@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app\static\app\content\admin.css" />
+    <Content Include="app\static\app\content\print.css" />
     <Content Include="app\templates\admin\base.html" />
     <Content Include="app\templates\app\admin\apply_template.html" />
     <Content Include="app\templates\app\form.html" />

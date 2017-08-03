@@ -41,7 +41,7 @@ class Student(models.Model):
 
 # Could probaby override save function but this is more cool
 @receiver(pre_save, sender=Student)
-def studnet_ssn_hash(sender, instance, *args, **kwargs):
+def student_ssn_hash(sender, instance, *args, **kwargs):
     if instance.identity is None:
         instance.populate_hash()
 
@@ -57,7 +57,7 @@ class Course(models.Model):
     year = models.CharField("År", max_length=32)
     term = models.CharField("Termin", choices=TERM_CHOICES, max_length=2)
     weeks = models.CharField("Antal veckor VFU", max_length=32)
-    students = models.ManyToManyField(Student, verbose_name="studenter")
+    students = models.ManyToManyField(Student, verbose_name="studenter", blank=True)
 
     def __str__(self):
         return "%s (%s %s)" % (self.name, self.year, self.term)

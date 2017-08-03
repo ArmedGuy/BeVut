@@ -1,0 +1,11 @@
+﻿@media print {
+    .nav-wrapper ul {
+        display: none;
+    }
+    a.button-collapse {
+        display: none;
+    }
+    input[type=button], input[type=submit], button, .btn, .btn-large {
+        display: none !important;
+    }
+}
