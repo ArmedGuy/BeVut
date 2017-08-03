@@ -77,6 +77,7 @@ def student_form(request, *args, **kwargs):
     elif request.method == "POST":
         if form.locked:
             return render(request, "app/form.html", ctx)
+        action_plan = 'no'
         for opt in form.template.formoption_set.all():
             if not request.POST.get(str(opt.id), False):
                 continue
@@ -87,6 +88,8 @@ def student_form(request, *args, **kwargs):
                     answer = FormAnswer(option=opt, form=form, is_midterm=True)
                 answer.result = res
                 ctx['midterm_answers'][opt.id] = res
+                if res == 'V':
+                    action_plan = 'yes'
                 ctx['current_answers'][opt.id] = res
                 answer.save()
             elif ctx['fullterm_in_progress']:
@@ -102,6 +105,7 @@ def student_form(request, *args, **kwargs):
                 form.midterm_signed = True
                 form.midterm_signed_date = datetime.today()
                 names = request.POST.getlist("signer_name")
+                form.midterm_action_plan = action_plan
                 positions = request.POST.getlist("signer_position")
                 for i in range(len(names)):
                     attendee = FormSigningAttendance(title=positions[i], name=names[i], midterm_sign=form)
@@ -117,6 +121,7 @@ def student_form(request, *args, **kwargs):
                     print("creating %s" % names[i])
                     attendee = FormSigningAttendance(title=positions[i], name=names[i], fullterm_sign=form)
                     attendee.save()
+        
                 
         if ctx['midterm_in_progress']:
             form.midterm_comments = request.POST.get("comments", "")
@@ -125,6 +130,7 @@ def student_form(request, *args, **kwargs):
             form.fullterm_comments = request.POST.get("comments", "")
             form.fullterm_absence = request.POST.get("absence", "")
             form.fullterm_ok_absence = request.POST.get("ok_absence", "")
+        form.midterm_action_plan = request.POST.get("action_plan", form.midterm_action_plan)
         form.handler = request.POST.get("handler")
         form.location = request.POST.get("location")
         form.save()

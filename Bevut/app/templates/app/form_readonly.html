@@ -44,7 +44,7 @@
         </div>
         
         <div class="row">
-            <div class="col m6 s12">
+            <div class="col s12">
                 <div class="card-panel grey lighten-5 hide-print">
                 <h5>Halvtidsbedömning</h5>
                 {% if student_form.midterm_signed %}
@@ -55,14 +55,14 @@
                 <h4>Ej genomförd</h4>
                 {% endif %}
                 </div>
-                <div class="show-print">
+                <div class="card-panel grey lighten-5 show-print">
                     <div class="input-field">
                         <input id="midterm_status" disabled type="text" value="{% if student_form.midterm_signed %}Slutförd {{student_form.midterm_signed_date}}{% elif midterm_in_progress %}Påbörjad{% else %}Ej genomförd{% endif %}" />
                         <label for="midterm_status">Halvtidsbedömning</label>
                     </div>
                 </div>
             </div>
-            <div class="col m6 s12">
+            <div class="col s12">
                 <div class="card-panel grey lighten-5 hide-print">
                 <h5>Heltidsbedömning</h5>
                 {% if student_form.fullterm_signed %}
@@ -76,7 +76,7 @@
                 {% endif %}
                 {% endif %}
                 </div>
-                <div class="show-print">
+                <div class="card-panel grey lighten-5 show-print">
                     <div class="input-field">
                         <input id="fullterm_status" disabled type="text" value="{% if student_form.fullterm_signed %}Slutförd {{student_form.fullterm_signed_date}}{% elif fullterm_in_progress %}Påbörjad{% else %}Ej genomförd{% endif %}" />
                         <label for="fullterm_status">Heltidssbedömning</label>
@@ -87,9 +87,15 @@
         <div class="new-page"></div>
         <div class="row">
             <div class="col s6">
-                <div class="card-panel grey lighten-5 help-midterm">Vid halvtidbedömning</div>
+                <div class="card-panel grey lighten-5">
+                    <h4>Om kursen</h4>
+                    <p>
+                        {{student_form.course.description}}
+                    </p>
+                </div>
             </div>
             <div class="col s6">
+                <div class="card-panel grey lighten-5 help-midterm">Vid halvtidbedömning</div>
                 <div class="card-panel grey lighten-5 help-fullterm">Vid heltidsbedömning</div>
             </div>
         </div>
@@ -103,35 +109,55 @@
                     {% if fullterm_in_progress %}
                     <input type="hidden" name="{{question.id}}" value="{{ fullterm_answers|get_item:question.id }}"/>
                     {% endif %}
-                <div class="number-box">{{question.nr}}</div>
-                <p class="flow-text">{{ question.description }}</p>
+                <div class="row">
+                    <div class="number-box">{{question.nr}}</div>
+                    <div class="question-description"><p class="flow-text">{{ question.description }}</p></div>
+                </div>
                 <div data-answer="G" class="card-panel grey lighten-5 answer-box{% if show_midterm_answer and midterm_answers|get_item:question.id == "OK"%} result-OK{%endif%}{% if answer == "OK" %} result-OK{%endif%}{% if answer == "G" %} result-G{%endif%}">
-                    <div class="row">
+                    <div class="row hide-print">
                         <div class="col m4 s12 flow-text select">
                             Godkänt
                         </div>
                         <div class="col m7 s10 desc"><div class="description">{{question.done_description}}</div></div>
                         <div class="col m1 s2 switch toggle"><i class="material-icons">import_export</i></div>
                     </div>
+                    <div class="show-print">
+                        <div class="input-field">
+                            <textarea id="q{{question.id}}pd"class="materialize-textarea">{{question.done_description}}</textarea>
+                            <label for="q{{question.id}}pd">Godkänt</label>
+                        </div>
+                    </div>
                 </div>
                 {% if student_form.template.has_well_done and not midterm_in_progress %}
                 <div data-answer="VG" class="card-panel grey lighten-5 answer-box{% if answer == "VG" %} result-VG{%endif%}{% if answer %} collapsed{% endif %}">
-                    <div class="row">
+                    <div class="row hide-print">
                         <div class="col m4 s12 flow-text select">
                             Väl godkänt
                         </div>
                         <div class="col m7 s10 desc"><div class="description">{{question.well_done_description}}</div></div>
                         <div class="col m1 s2 switch toggle"><i class="material-icons">import_export</i></div>
                     </div>
+                    <div class="show-print">
+                        <div class="input-field">
+                            <textarea id="q{{question.id}}pwd"class="materialize-textarea">{{question.well_done_description}}</textarea>
+                            <label for="q{{question.id}}pwd">Väl godkänt</label>
+                        </div>
+                    </div>
                 </div>
                 {% endif %}
                 <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V"%} result-V{%endif%}{% if answer == "V" %} result-V{%endif%}{% if answer == "U" %} result-U{%endif%}">
-                    <div class="row">
+                    <div class="row hide-print">
                         <div class="col m4 s12 flow-text select">
                             Underkänt
                         </div>
                         <div class="col m7 s10 desc"><div class="description">{{question.not_done_description}}</div></div>
                         <div class="col m1 s2 switch toggle"><i class="material-icons">import_export</i></div>
+                    </div>
+                    <div class="show-print">
+                        <div class="input-field">
+                            <textarea id="q{{question.id}}pnd"class="materialize-textarea">{{question.not_done_description}}</textarea>
+                            <label for="q{{question.id}}pnd">Underkänt</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -168,7 +194,7 @@
                         </div>
                         <h5>Närvarande vid halvtidsbedömning</h5>
                         <div class="signers">
-                            {% for signer in student_form.midterm_user_sign.all %}
+                            {% for signer in student_form.midterm_user_signed.all %}
                             <div class="signer">
                                 <div class="row">
                                     <div class="col s6">

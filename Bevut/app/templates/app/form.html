@@ -63,6 +63,15 @@
             $(".signing").show();
         }
         {% if midterm_in_progress or fullterm_in_progress %}
+        function updateActionPlan() {
+            if ($(".answer-box").hasClass("result-V")) {
+                $(".action-plan").show();
+            } else {
+                $(".action-plan").hide();
+            }
+        }
+
+        updateActionPlan();
         $(".answer-box")
             .click(function() {
                 $box = $(this);
@@ -76,6 +85,7 @@
                 {% endif %}
                 $box.parent().find("input[type=hidden]").val(ans);
                 $box.addClass("result-" + ans);
+                updateActionPlan();
             });
         {% endif %}
         $(".answer-box .toggle")
@@ -95,7 +105,7 @@
 
 <div id="state-holder" class="container {% if midterm_in_progress %}midterm{% endif %} {% if fullterm_in_progress %}fullterm{% endif %}">
     <h2>{{ student_form.student }} <br /><small>Bedömning i {{ student_form.course }}</small></h2>
-    <a href="/app/form/{{student_form.link_uuid}}">Read only</a>
+    <a class="btn grey lighten-3 black-text" href="/app/form/{{student_form.link_uuid}}">Utskriftsvänlig version</a>
     <form method="POST">
     {% csrf_token %}
         <div class="card-panel grey lighten-5">
@@ -117,11 +127,29 @@
             </div>
         </div>
         <div class="row">
-            <div class="col m6 s12">
+            <div class="col s12">
                 <div class="card-panel grey lighten-5">
                 <h5>Halvtidsbedömning</h5>
                 {% if student_form.midterm_signed %}
-                <h4>Slutförd {{student_form.midterm_signed_date}}</h4>
+                    <h4>Slutförd {{student_form.midterm_signed_date}}</h4>
+                    {% if student_form.midterm_action_plan == 'yes' %}
+                    <div class="action-plan card-panel red darken-3 white-text">
+                        <h4>Risk för underkännande</h4>
+                        <p>Vid risk för underkännande måste en åtgärdsplan upprättas</p>
+                        <p class="checkbox white-text">
+                            <input type="checkbox" name="action_plan" id="action_plan" value="started"/>
+                            <label for="action_plan">Åtgärdsplan har upprättats</label>
+                            <div class="input-field">
+                                <input type="submit" value="Uppdatera" class="btn"/>
+                            </div>
+                        </p>
+                    </div>
+                    {% elif student_form.midterm_action_plan == 'started' %}
+                    <div class="action-plan card-panel red darken-1 white-text">
+                        <h4>Risk för underkännande</h4>
+                        <p>Åtgärdsplan har upprättats</p>
+                    </div>
+                    {% endif %}
                 {% elif midterm_in_progress %}
                 <h4>Påbörjad</h4>
                 {% else %}
@@ -130,7 +158,7 @@
                 {% endif %}
                 </div>
             </div>
-            <div class="col m6 s12">
+            <div class="col s12">
                 <div class="card-panel grey lighten-5">
                 <h5>Heltidsbedömning</h5>
                 {% if student_form.fullterm_signed %}
@@ -149,9 +177,15 @@
         </div>
         <div class="row">
             <div class="col s6">
-                <div class="card-panel grey lighten-5 help-midterm">Vid halvtidbedömning</div>
+                <div class="card-panel grey lighten-5">
+                    <h4>Om kursen</h4>
+                    <p>
+                        {{student_form.course.description}}
+                    </p>
+                </div>
             </div>
             <div class="col s6">
+                <div class="card-panel grey lighten-5 help-midterm">Vid halvtidbedömning</div>
                 <div class="card-panel grey lighten-5 help-fullterm">Vid heltidsbedömning</div>
             </div>
         </div>
@@ -159,14 +193,16 @@
             {% for question in student_form.template.formoption_set.all %}
             {% with answer=current_answers|get_item:question.id %}
             <div class="question">
-                 {% if midterm_in_progress %}
-                    <input type="hidden" name="{{question.id}}" value="{{ midterm_answers|get_item:question.id }}"/>
-                    {% endif %}
-                    {% if fullterm_in_progress %}
-                    <input type="hidden" name="{{question.id}}" value="{{ fullterm_answers|get_item:question.id }}"/>
-                    {% endif %}
-                <div class="number-box">{{question.nr}}</div>
-                <p class="flow-text">{{ question.description }}</p>
+                {% if midterm_in_progress %}
+                <input type="hidden" name="{{question.id}}" value="{{ midterm_answers|get_item:question.id }}"/>
+                {% endif %}
+                {% if fullterm_in_progress %}
+                <input type="hidden" name="{{question.id}}" value="{{ fullterm_answers|get_item:question.id }}"/>
+                {% endif %}
+                <div class="row">
+                    <div class="number-box">{{question.nr}}</div>
+                    <div class="question-description"><p class="flow-text">{{ question.description }}</p></div>
+                </div>
                 <div data-answer="G" class="card-panel grey lighten-5 answer-box{% if show_midterm_answer and midterm_answers|get_item:question.id == "OK"%} result-OK{%endif%}{% if answer == "OK" %} result-OK{%endif%}{% if answer == "G" %} result-G{%endif%}{% if answer %} collapsed{% endif %}">
                     <div class="row">
                         <div class="col m4 s12 flow-text select">
@@ -188,7 +224,7 @@
                 </div>
                 {% endif %}
                 <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V"%} result-V{%endif%}{% if answer == "V" %} result-V{%endif%}{% if answer == "U" %} result-U{%endif%}{% if answer %} collapsed{% endif %}">
-                    <div class="row">
+                    <div class="row hide-print">
                         <div class="col m4 s12 flow-text select">
                             Underkänt
                         </div>
@@ -197,6 +233,7 @@
                     </div>
                 </div>
             </div>
+            <hr/>
             {% endwith %}
             {% endfor %}
         </div>
@@ -227,19 +264,23 @@
                             <input disabled id="sign_date" type="text" class="validate" value="{{ todays_date }}">
                             <label for="sign_date">Datum för signering</label>
                         </div>
+                        <div class="action-plan card-panel red darken-3 white-text">
+                            <h4>Risk för underkännande</h4>
+                            <p>Vid risk för underkännande måste en åtgärdsplan upprättas</p>
+                        </div>
                         <h5>Närvarande vid halvtidsbedömning</h5>
                         <div class="signers">
                             <div class="signer">
                                 <div class="row">
                                     <div class="col s6">
                                         <div class="input-field">
-                                            <input id="signer_name1" required type="text" name="signer_name" class="validate" value="">
+                                            <input id="signer_name1" type="text" name="signer_name" class="validate" value="">
                                             <label for="signer_name1">Namn på person</label>
                                         </div>
                                     </div>
                                     <div class="col s5">
                                         <div class="input-field">
-                                            <input id="signer_position1" required type="text" name="signer_position" class="validate" value="">
+                                            <input id="signer_position1" type="text" name="signer_position" class="validate" value="">
                                             <label for="signer_position1">Befattning</label>
                                         </div>
                                     </div>
@@ -290,19 +331,19 @@
                             <input disabled id="sign_date" type="text" class="validate" value="{{ todays_date }}">
                             <label for="sign_date">Datum för signering</label>
                         </div>
-                        <h5>Närvarande vid halvtidsbedömning</h5>
+                        <h5>Närvarande vid heltidsbedömning</h5>
                         <div class="signers">
                             <div class="signer">
                                 <div class="row">
                                     <div class="col s6">
                                         <div class="input-field">
-                                            <input id="signer_name1" required type="text" name="signer_name" class="validate" value="">
+                                            <input id="signer_name1" type="text" name="signer_name" class="validate" value="">
                                             <label for="signer_name1">Namn på person</label>
                                         </div>
                                     </div>
                                     <div class="col s5">
                                         <div class="input-field">
-                                            <input id="signer_position1" required type="text" name="signer_position" class="validate" value="">
+                                            <input id="signer_position1" type="text" name="signer_position" class="validate" value="">
                                             <label for="signer_position1">Befattning</label>
                                         </div>
                                     </div>

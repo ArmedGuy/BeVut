@@ -78,6 +78,13 @@
     text-align: center;
     background-color: #ddd;
 }
+.row .number-box {
+    float: left;
+    margin-right: 10px;
+}
+.row .question-description {
+    float: left;
+}
 table tbody td {
     vertical-align: top;
 }
@@ -90,6 +97,13 @@ table tbody td p {
 }
 p.checkbox {
     margin-bottom: 30px;
+}
+hr {
+    border: 1px solid #ccc;
+    border-color: #ccc;
+    background-color: #ccc;
+    margin-top: 30px;
+    margin-bottom: 60px;
 }
 /*table tbody tr:nth-child(even) td:nth-child(odd) {
     background-color: #eee;
