@@ -21,6 +21,10 @@ urlpatterns = [
     url(r'^app/course/$', app.views.courses, name="courses"),
     url(r'^app/course/(?P<id>[0-9]+)/$', app.views.course, name='course'),
     url(r'^app/form/(?P<id>[0-9]+)/$', app.views.student_form, name='student_form'),
+    url(
+        r'^app/form/read-only/(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/$',
+        app.views.readonly_studentform,
+        name='readonly_studentform'),
     url(r'^login/$',
         django.contrib.auth.views.login,
         {

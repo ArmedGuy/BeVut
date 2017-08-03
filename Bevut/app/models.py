@@ -3,6 +3,7 @@ Definition of models.
 """
 
 from hashlib import sha256
+from uuid import uuid4
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -127,6 +128,7 @@ class StudentForm(models.Model):
     fullterm_absence = models.CharField("Frånvaro vid heltidsbedömning", max_length=10, blank=True)
     fullterm_ok_absence = models.CharField("OK Frånvaro vid heltidsbedömning", max_length=10, blank=True)
     locked = models.BooleanField("Låst", default=False)
+    link_uuid = models.UUIDField('Read only länk id', default=uuid4, editable=True)
 
     def __str__(self):
         return "%s - %s" % (self.student.name, self.course)
