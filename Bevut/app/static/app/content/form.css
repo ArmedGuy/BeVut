@@ -85,9 +85,6 @@ table tbody td p {
     margin: 5px;
     margin-top: 2px;
 }
-.signing {
-    display: none;
-}
 #add_user i.small {
     font-size: 1.2rem;
 }
@@ -121,7 +118,7 @@ input[type="tel"]:disabled, input[type="tel"][readonly="readonly"],
 input[type="number"]:disabled, input[type="number"][readonly="readonly"],
 input[type="search"]:disabled, input[type="search"][readonly="readonly"],
 textarea.materialize-textarea:disabled, textarea.materialize-textarea[readonly="readonly"] {
-    color: rgba(0, 0, 0, 0.56);
+    color: rgba(0, 0, 0, 0.78);
 }
 input:disabled:not([type]) + label, input[readonly="readonly"]:not([type]) + label,
 input[type="text"]:disabled + label, input[type="text"][readonly="readonly"] + label,
@@ -137,4 +134,7 @@ input[type="number"]:disabled + label, input[type="number"][readonly="readonly"]
 input[type="search"]:disabled + label, input[type="search"][readonly="readonly"] + label,
 textarea.materialize-textarea:disabled + label, textarea.materialize-textarea[readonly="readonly"] + label {
     color: rgba(0, 0, 0, 0.56);
+}
+.readonly .switch {
+    visibility: hidden;
 }

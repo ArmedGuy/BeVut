@@ -23,79 +23,10 @@
         </div>
     </div>
 </script>
-<script>
-    $(function() {
-        $signerTemplate = $("#signer-template").html();
-        $(".results input[type=hidden]")
-            .each(function() {
-                var value = $(this).val();
-                if (value === "")
-                    return;
-                $(this).parent().children(".answer-box.set.result-" + value).addClass("selected");
-            });
-        $(".set")
-            .click(function() {
-                $(this).parent().children(".answer-box.set").removeClass("selected");
-                var val = $(this).text();
-                $(this).parent().children("input[type=hidden]").val(val);
-                $(this).addClass("selected");
-            });
-        var $state = $("#state-holder");
-        $state.on("click",
-            ".delete-btn",
-            function() {
-                $(this).parent().parent().parent().remove();
-            });
-        $("#add_user")
-            .click(function(e) {
-                e.preventDefault();
-                $(".signers").append($signerTemplate);
-            });
-        $("#sign")
-            .click(function() {
-                if ($(this).is(":checked")) {
-                    $(".signing").show();
-                } else {
-                    $(".signing").hide();
-                }
-            });
-        if($("#sign").is(":checked")) {
-            $(".signing").show();
-        }
-        {% if midterm_in_progress or fullterm_in_progress %}
-        $(".answer-box")
-            .click(function() {
-                $box = $(this);
-                $box.parent().find(".answer-box").removeClass("result-OK result-G result-V result-U result-VG").addClass("collapsed");
-                var ans = $box.data("answer");
-                {% if midterm_in_progress %}
-                if (ans == "G")
-                    ans = "OK";
-                if (ans == "U")
-                    ans = "V";
-                {% endif %}
-                $box.parent().find("input[type=hidden]").val(ans);
-                $box.addClass("result-" + ans);
-            });
-        {% endif %}
-        $(".answer-box .toggle")
-            .click(function (event) {
-                event.stopPropagation();
-                $box = $(this).parent().parent();
-                if ($box.hasClass("collapsed")) {
-                    $box.removeClass("collapsed");
-                } else {
-                    $box.addClass("collapsed");
-                }
-            });
-    });
-</script>
 {% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'app/content/form.css' %}" />
-
-<div id="state-holder" class="container {% if midterm_in_progress %}midterm{% endif %} {% if fullterm_in_progress %}fullterm{% endif %}">
-    <h2>{{ student_form }}</h2>
+<div id="state-holder" class="container {% if midterm_in_progress %}midterm{% endif %} {% if fullterm_in_progress %}fullterm{% endif %} readonly">
+    <h2>{{ student_form.student }} <br /><small>Bedömning i {{ student_form.course }}</small></h2>
         <div class="card-panel grey lighten-5">
             <h5>Information</h5>
             <div class="input-field">
@@ -103,18 +34,18 @@
                 <label for="ssn">Personnummer</label>
             </div>
             <div class="input-field">
-                <input id="handler" type="text" name="handler" class="validate" value="{{ student_form.handler }}">
+                <input id="handler" disabled type="text" name="handler" class="validate" value="{{ student_form.handler }}">
                 <label for="handler">Handledare/ansvarig</label>
             </div>
             <div class="input-field">
-                <input id="location" type="text" name="location" class="validate" value="{{ student_form.location }}">
+                <input id="location" disabled type="text" name="location" class="validate" value="{{ student_form.location }}">
                 <label for="location">VFU-placering</label>
             </div>
         </div>
-        <h3>Bedömning</h3>
+        
         <div class="row">
             <div class="col m6 s12">
-                <div class="card-panel grey lighten-5">
+                <div class="card-panel grey lighten-5 hide-print">
                 <h5>Halvtidsbedömning</h5>
                 {% if student_form.midterm_signed %}
                 <h4>Slutförd {{student_form.midterm_signed_date}}</h4>
@@ -124,9 +55,15 @@
                 <h4>Ej genomförd</h4>
                 {% endif %}
                 </div>
+                <div class="show-print">
+                    <div class="input-field">
+                        <input id="midterm_status" disabled type="text" value="{% if student_form.midterm_signed %}Slutförd {{student_form.midterm_signed_date}}{% elif midterm_in_progress %}Påbörjad{% else %}Ej genomförd{% endif %}" />
+                        <label for="midterm_status">Halvtidsbedömning</label>
+                    </div>
+                </div>
             </div>
             <div class="col m6 s12">
-                <div class="card-panel grey lighten-5">
+                <div class="card-panel grey lighten-5 hide-print">
                 <h5>Heltidsbedömning</h5>
                 {% if student_form.fullterm_signed %}
                 <h4>Slutförd {{student_form.fullterm_signed_date}}</h4>
@@ -139,8 +76,15 @@
                 {% endif %}
                 {% endif %}
                 </div>
+                <div class="show-print">
+                    <div class="input-field">
+                        <input id="fullterm_status" disabled type="text" value="{% if student_form.fullterm_signed %}Slutförd {{student_form.fullterm_signed_date}}{% elif fullterm_in_progress %}Påbörjad{% else %}Ej genomförd{% endif %}" />
+                        <label for="fullterm_status">Heltidssbedömning</label>
+                    </div>
+                </div>
             </div>
         </div>
+        <div class="new-page"></div>
         <div class="row">
             <div class="col s6">
                 <div class="card-panel grey lighten-5 help-midterm">Vid halvtidbedömning</div>
@@ -181,7 +125,7 @@
                     </div>
                 </div>
                 {% endif %}
-                <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V"%} result-V{%endif%}{% if answer == "V" %} result-V{%endif%}{% if answer == "U" %} result-U{%endif%}{% if answer %} collapsed{% endif %}">
+                <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V"%} result-V{%endif%}{% if answer == "V" %} result-V{%endif%}{% if answer == "U" %} result-U{%endif%}">
                     <div class="row">
                         <div class="col m4 s12 flow-text select">
                             Underkänt
@@ -196,24 +140,25 @@
         </div>
  
         {% if student_form.midterm_signed %}
+        <div class="new-page"></div>
         <div class="card-panel grey lighten-5">
             <h4>Halvtidsbedömning</h4>
             <div class="row">
                 <div class="col s12">
                     
                     <div class="input-field">
-                        <input id="absence" type="text" name="absence" class="validate" value="{{student_form.midterm_absence}}">
+                        <input id="absence" disabled type="text" name="absence" class="validate" value="{{student_form.midterm_absence}}">
                         <label for="absence">Frånvaro (antal dagar)</label>
                     </div>
                     <div class="input-field">
-                        <textarea id="comments" name="comments" class="materialize-textarea">{{student_form.midterm_comments}}</textarea>
+                        <textarea id="comments" disabled name="comments" class="materialize-textarea">{{student_form.midterm_comments}}</textarea>
                         <label for="comments">Övriga kommentarer</label>
                     </div>
                 </div>
                 <div class="col s12">
                     <input type="hidden" name="term" value="midterm"/>
                     <p class="checkbox">
-                        <input type="checkbox" name="sign" id="sign" value="true"/>
+                        <input type="checkbox" disabled checked name="sign" id="sign" value="true"/>
                         <label for="sign">Slutför och signera halvtidsbedömning</label>
                     </p>
                     <div class="signing">
@@ -223,18 +168,18 @@
                         </div>
                         <h5>Närvarande vid halvtidsbedömning</h5>
                         <div class="signers">
-                            {% for signer in student_form.midterm_user_sign %}
+                            {% for signer in student_form.midterm_user_sign.all %}
                             <div class="signer">
                                 <div class="row">
                                     <div class="col s6">
                                         <div class="input-field">
-                                            <input id="signer_name1" required type="text" name="signer_name" class="validate" value="{{ signer.name }}">
+                                            <input id="signer_name1" disabled required type="text" name="signer_name" class="validate" value="{{ signer.name }}">
                                             <label for="signer_name1">Namn på person</label>
                                         </div>
                                     </div>
                                     <div class="col s6">
                                         <div class="input-field">
-                                            <input id="signer_position1" required type="text" name="signer_position" class="validate" value="{{ signer.title }}">
+                                            <input id="signer_position1" disabled required type="text" name="signer_position" class="validate" value="{{ signer.title }}">
                                             <label for="signer_position1">Befattning</label>
                                         </div>
                                     </div>
@@ -242,39 +187,36 @@
                             </div>
                             {% endfor %}
                         </div>
-                        <a href="#" id="add_user"><i class="material-icons small">add</i> Lägg till fält</a>
-                    </div>
-                    <div class="input-field">
-                        <input type="submit" value="Uppdatera" class="btn-large"/>
                     </div>
                 </div>
             </div>
         </div>
         {% endif %}
         {% if student_form.fullterm_signed %}
+        <div class="new-page"></div>
         <div class="card-panel grey lighten-5">
             <h4>Heltidsbedömning</h4>
             <div class="row">
                 <div class="col s12">
                     <div class="input-field">
-                        <input id="absence" type="text" name="absence" class="validate" value="{{student_form.fullterm_absence}}">
+                        <input id="absence" disabled type="text" name="absence" class="validate" value="{{student_form.fullterm_absence}}">
                         <label for="absence">Frånvaro (antal dagar)</label>
                     </div>
                     <div class="input-field">
-                        <input id="ok_absence" type="text" name="ok_absence" class="validate" value="{{student_form.fullterm_ok_absence}}">
+                        <input id="ok_absence" disabled type="text" name="ok_absence" class="validate" value="{{student_form.fullterm_ok_absence}}">
                         <label for="ok_absence">Från lärosätet godkänd frånvaro (antal dagar)</label>
                     </div>
                 </div>
                 <div class="col s12 ">
                     <div class="input-field">
-                        <textarea id="comments" name="comments" class="materialize-textarea">{{student_form.fullterm_comments}}</textarea>
+                        <textarea id="comments" disabled name="comments" class="materialize-textarea">{{student_form.fullterm_comments}}</textarea>
                         <label for="comments">Övriga kommentarer</label>
                     </div>
                 </div>
                 <div class="col s12">
                     <input type="hidden" name="term" value="fullterm"/>
                     <p class="checkbox">
-                        <input type="checkbox" checked name="sign" id="sign" value="true"/>
+                        <input type="checkbox" disabled checked name="sign" id="sign" value="true"/>
                         <label for="sign">Slutför och signera heltidsbedömning</label>
                     </p>
                     <div class="signing">
@@ -284,32 +226,25 @@
                         </div>
                         <h5>Närvarande vid heltidsbedömning</h5>
                         <div class="signers">
-                            {% for signer in student_form.fullterm_user_signed %}
+                            {% for signer in student_form.fullterm_user_signed.all %}
                             <div class="signer">
                                 <div class="row">
                                     <div class="col s6">
                                         <div class="input-field">
-                                            <input id="signer_name1" required type="text" name="signer_name" class="validate" value="{{signer.name}}">
+                                            <input id="signer_name1" disabled required type="text" name="signer_name" class="validate" value="{{signer.name}}">
                                             <label for="signer_name1">Namn på person</label>
                                         </div>
                                     </div>
                                     <div class="col s6">
                                         <div class="input-field">
-                                            <input id="signer_position1" required type="text" name="signer_position" class="validate" value="{{signer.title}}">
+                                            <input id="signer_position1" disabled required type="text" name="signer_position" class="validate" value="{{signer.title}}">
                                             <label for="signer_position1">Befattning</label>
-                                        </div>
-                                    </div>
-                                    <div class="col s1">
-                                        <div class="delete-btn"><i class="material-icons">close</i>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             {% endfor %}
                         </div>
-                    </div>
-                    <div class="input-field">
-                        <input type="submit" value="Uppdatera" class="btn-large"/>
                     </div>
                 </div>
             </div>

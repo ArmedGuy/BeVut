@@ -1,4 +1,8 @@
-﻿@media print {
+﻿.hide-print {
+
+}
+.show-print { display: none; }
+@media print {
     .nav-wrapper ul {
         display: none;
     }
@@ -8,4 +12,22 @@
     input[type=button], input[type=submit], button, .btn, .btn-large {
         display: none !important;
     }
+    .card-panel {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+    }
+    .new-page {
+        page-break-after: always;
+    }
+    .number-box {
+        border: 6px solid #333;
+    }
+    .footer-text {
+        display: none;
+    }
+    .hide-print {
+        display: none;
+    }
+    .show-print { display: block; }
 }

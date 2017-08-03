@@ -92,10 +92,10 @@
 </script>
 {% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{% static 'app/content/form.css' %}" />
 
 <div id="state-holder" class="container {% if midterm_in_progress %}midterm{% endif %} {% if fullterm_in_progress %}fullterm{% endif %}">
-    <h2>{{ student_form }}</h2>
+    <h2>{{ student_form.student }} <br /><small>Bedömning i {{ student_form.course }}</small></h2>
+    <a href="/app/form/{{student_form.link_uuid}}">Read only</a>
     <form method="POST">
     {% csrf_token %}
         <div class="card-panel grey lighten-5">
@@ -116,7 +116,6 @@
                 <input type="submit" value="Uppdatera" class="btn-large"/>
             </div>
         </div>
-        <h3>Bedömning</h3>
         <div class="row">
             <div class="col m6 s12">
                 <div class="card-panel grey lighten-5">
@@ -223,7 +222,7 @@
                         <input type="checkbox" name="sign" id="sign" value="true"/>
                         <label for="sign">Slutför och signera halvtidsbedömning</label>
                     </p>
-                    <div class="signing">
+                    <div class="signing" style="display: none;">
                         <div class="input-field">
                             <input disabled id="sign_date" type="text" class="validate" value="{{ todays_date }}">
                             <label for="sign_date">Datum för signering</label>
@@ -286,7 +285,7 @@
                         <input type="checkbox" name="sign" id="sign" value="true"/>
                         <label for="sign">Slutför och signera heltidsbedömning</label>
                     </p>
-                    <div class="signing">
+                    <div class="signing" style="display:none;">
                         <div class="input-field">
                             <input disabled id="sign_date" type="text" class="validate" value="{{ todays_date }}">
                             <label for="sign_date">Datum för signering</label>

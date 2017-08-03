@@ -111,8 +111,10 @@ def student_form(request, *args, **kwargs):
                 form.fullterm_signed = True
                 form.fullterm_signed_date = datetime.today()
                 names = request.POST.getlist("signer_name")
+                print(names)
                 positions = request.POST.getlist("signer_position")
                 for i in range(len(names)):
+                    print("creating %s" % names[i])
                     attendee = FormSigningAttendance(title=positions[i], name=names[i], fullterm_sign=form)
                     attendee.save()
                 
@@ -145,17 +147,42 @@ def student_form(request, *args, **kwargs):
 @require_GET
 @login_required
 def readonly_studentform(request, *args, **kwargs):
-    studentform = None
+    form = None
     try:
         uuid = UUID(kwargs["uuid"])
-        print(uuid)
-        studentform = StudentForm.objects.filter(link_uuid=uuid).first()
+        form = StudentForm.objects.filter(link_uuid=uuid).first()
     except:
         pass
 
-    if studentform is None:
-        raise Http404('No such form')
+    if form is None:
+        raise Http404()
+    ctx = {}
+    ctx['todays_date'] = datetime.today().strftime('%Y-%m-%d')
+    ctx['student_form'] = form
+    ctx['current_answers'] = {}
+    ctx['midterm_answers'] = {}
+    for a in form.formanswer_set.filter(is_midterm=True):
+        ctx['midterm_answers'][a.option.id] = a.result
+        ctx['current_answers'][a.option.id] = a.result
+    ctx['fullterm_answers'] = {}
+    for a in form.formanswer_set.filter(is_midterm=False):
+        ctx['fullterm_answers'][a.option.id] = a.result
+        ctx['current_answers'][a.option.id] = a.result
 
-    return render(request, 'app/readonly-studentform.html', dict(studentform=studentform))
+    ctx['midterm_in_progress'] = (
+            "midterm" in [
+                request.POST.get("term"),
+                request.GET.get("term")]
+            or len(ctx['midterm_answers']) != 0) and not form.midterm_signed
+
+    ctx['fullterm_in_progress'] = (
+            "fullterm" in [
+                request.POST.get("term"),
+                request.GET.get("term")]
+            or len(ctx['fullterm_answers']) != 0) and not form.fullterm_signed and not ctx['midterm_in_progress']
+    ctx['show_midterm_answer'] = not ctx['midterm_in_progress'] and (
+            ctx['fullterm_in_progress'] and not form.fullterm_signed
+            ) or request.GET.get("show_midterm")
+    return render(request, 'app/form_readonly.html', ctx)
 
 # vi: ts=4 expandtab

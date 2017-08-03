@@ -18,8 +18,8 @@
             <tr>
 				<td><a href="{% url 'student_form' f.id %}">{{ f.student.name }}</a></td>
                 <td>{{f.student.ssn}}</td>
-                <td>{% if f.has_midterm %}Ja{%else%}Nej{% endif %}</td>
-                <td>{% if f.has_fullterm %}Ja{%else%}Nej{% endif %}</td>
+                <td>{% if f.midterm_signed %}Ja{%else%}Nej{% endif %}</td>
+                <td>{% if f.fullterm_signed %}Ja{%else%}Nej{% endif %}</td>
             </tr>
             {% endfor %}
         </tbody>
