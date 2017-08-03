@@ -12,8 +12,6 @@ from app.models import Course, StudentForm, FormAnswer, FormSigningAttendance
 from datetime import datetime
 from django.views.decorators.http import require_GET
 
-from app.models import Course, StudentForm, FormAnswer
-
 
 def home(request):
     """Renders the home page."""
@@ -106,7 +104,7 @@ def student_form(request, *args, **kwargs):
                 for i in range(len(names)):
                     attendee = FormSigningAttendance(title=positions[i], name=names[i], midterm_sign=form)
                     attendee.save()
-                
+
             if ctx['fullterm_in_progress']:
                 form.fullterm_signed = True
                 form.fullterm_signed_date = datetime.today()
@@ -115,7 +113,7 @@ def student_form(request, *args, **kwargs):
                 for i in range(len(names)):
                     attendee = FormSigningAttendance(title=positions[i], name=names[i], fullterm_sign=form)
                     attendee.save()
-                
+
         if ctx['midterm_in_progress']:
             form.midterm_comments = request.POST.get("comments", "")
             form.midterm_absence = request.POST.get("absence", "")
