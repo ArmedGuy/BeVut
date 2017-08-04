@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^app/$', app.views.courses, name='app_home'),
     url(r'^app/course/$', app.views.courses, name="courses"),
     url(r'^app/course/(?P<id>[0-9]+)/$', app.views.course, name='course'),
+    url(r'^app/course/(?P<id>[0-9]+)/actionplans$', app.views.course_action_plan, name='course_action_plan'),
     url(r'^app/form/(?P<id>[0-9]+)/$', app.views.student_form, name='student_form'),
     url(r'^app/form/(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/$',
         app.views.readonly_studentform,

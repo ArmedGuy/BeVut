@@ -74,6 +74,8 @@
     <Content Include="app\static\app\content\print.css" />
     <Content Include="app\templates\admin\base.html" />
     <Content Include="app\templates\app\admin\apply_template.html" />
+    <Content Include="app\templates\app\course_action_plan.html" />
+    <Content Include="app\templates\app\course_ratings.html" />
     <Content Include="app\templates\app\form_readonly.html" />
     <Content Include="app\templates\app\form.html" />
     <Content Include="app\templates\app\course.html" />

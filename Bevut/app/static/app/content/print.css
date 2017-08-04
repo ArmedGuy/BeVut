@@ -3,6 +3,7 @@
 }
 .show-print { display: none; }
 @media print {
+
     .nav-wrapper ul {
         display: none;
     }

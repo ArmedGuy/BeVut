@@ -104,8 +104,8 @@
 {% block content %}
 
 <div id="state-holder" class="container {% if midterm_in_progress %}midterm{% endif %} {% if fullterm_in_progress %}fullterm{% endif %}">
-    <h2>{{ student_form.student }} <br /><small>Bedömning i {{ student_form.course }}</small></h2>
-    <a class="btn grey lighten-3 black-text" href="/app/form/{{student_form.link_uuid}}">Utskriftsvänlig version</a>
+    <h2>{{ student_form.student }} <br /><small class="grey-text">Bedömning i {{ student_form.course }}</small></h2>
+    <a class="btn grey lighten-3 black-text" href="{% url 'readonly_studentform' student_form.link_uuid %}">Utskriftsvänlig version</a>
     <form method="POST">
     {% csrf_token %}
         <div class="card-panel grey lighten-5">
@@ -128,28 +128,11 @@
         </div>
         <div class="row">
             <div class="col s12">
-                <div class="card-panel grey lighten-5">
+                <div class="card-panel blue-grey darken-2 white-text">
                 <h5>Halvtidsbedömning</h5>
                 {% if student_form.midterm_signed %}
                     <h4>Slutförd {{student_form.midterm_signed_date}}</h4>
-                    {% if student_form.midterm_action_plan == 'yes' %}
-                    <div class="action-plan card-panel red darken-3 white-text">
-                        <h4>Risk för underkännande</h4>
-                        <p>Vid risk för underkännande måste en åtgärdsplan upprättas</p>
-                        <p class="checkbox white-text">
-                            <input type="checkbox" name="action_plan" id="action_plan" value="started"/>
-                            <label for="action_plan">Åtgärdsplan har upprättats</label>
-                            <div class="input-field">
-                                <input type="submit" value="Uppdatera" class="btn"/>
-                            </div>
-                        </p>
-                    </div>
-                    {% elif student_form.midterm_action_plan == 'started' %}
-                    <div class="action-plan card-panel red darken-1 white-text">
-                        <h4>Risk för underkännande</h4>
-                        <p>Åtgärdsplan har upprättats</p>
-                    </div>
-                    {% endif %}
+                    
                 {% elif midterm_in_progress %}
                 <h4>Påbörjad</h4>
                 {% else %}
@@ -159,7 +142,27 @@
                 </div>
             </div>
             <div class="col s12">
-                <div class="card-panel grey lighten-5">
+            {% if student_form.midterm_signed and student_form.midterm_action_plan == 'yes' %}
+            <div class="card-panel red lighten-3 white-text">
+                <h4>Risk för underkännande</h4>
+                <p>Vid risk för underkännande måste en åtgärdsplan upprättas</p>
+                <p class="checkbox white-text">
+                    <input type="checkbox" name="action_plan" id="action_plan" value="started"/>
+                    <label for="action_plan">Åtgärdsplan har upprättats</label>
+                    <div class="input-field">
+                        <input type="submit" value="Uppdatera" class="btn"/>
+                    </div>
+                </p>
+            </div>
+            {% elif student_form.midterm_action_plan == 'started' %}
+            <div class="card-panel red lighten-2 white-text">
+                <h4>Risk för underkännande</h4>
+                <p>Åtgärdsplan har upprättats efter halvtidsbedömning</p>
+            </div>
+            {% endif %}
+            </div>
+            <div class="col s12">
+                <div class="card-panel blue-grey darken-2 white-text">
                 <h5>Heltidsbedömning</h5>
                 {% if student_form.fullterm_signed %}
                 <h4>Slutförd {{student_form.fullterm_signed_date}}</h4>
@@ -189,27 +192,31 @@
                 <div class="card-panel grey lighten-5 help-fullterm">Vid heltidsbedömning</div>
             </div>
         </div>
-        <div class="questions">
+        <div class="questions row">
             {% for question in student_form.template.formoption_set.all %}
             {% with answer=current_answers|get_item:question.id %}
-            <div class="question">
+            <div class="question col s12 m6">
                 {% if midterm_in_progress %}
                 <input type="hidden" name="{{question.id}}" value="{{ midterm_answers|get_item:question.id }}"/>
                 {% endif %}
                 {% if fullterm_in_progress %}
                 <input type="hidden" name="{{question.id}}" value="{{ fullterm_answers|get_item:question.id }}"/>
                 {% endif %}
-                <div class="row">
-                    <div class="number-box">{{question.nr}}</div>
-                    <div class="question-description"><p class="flow-text">{{ question.description }}</p></div>
+                <div class="card-panel blue-grey darken-2 white-text">
+                    <div class="row">
+                        <div class="col s12">
+                            <h4>{{question.nr}}</h4>
+                        </div>
+                        <div class="col s12 question-description">{{ question.description }}</div>
+                    </div>
                 </div>
                 <div data-answer="G" class="card-panel grey lighten-5 answer-box{% if show_midterm_answer and midterm_answers|get_item:question.id == "OK"%} result-OK{%endif%}{% if answer == "OK" %} result-OK{%endif%}{% if answer == "G" %} result-G{%endif%}{% if answer %} collapsed{% endif %}">
                     <div class="row">
-                        <div class="col m4 s12 flow-text select">
+                        <div class="col s12 flow-text select">
                             Godkänt
                         </div>
-                        <div class="col m7 s10 desc"><div class="description">{{question.done_description}}</div></div>
-                        <div class="col m1 s2 switch toggle"><i class="material-icons">import_export</i></div>
+                        <div class="col s10 desc"><div class="description">{{question.done_description}}</div></div>
+                        <div class="col s2 switch toggle"><i class="material-icons">import_export</i></div>
                     </div>
                 </div>
                 {% if student_form.template.has_well_done and not midterm_in_progress %}
@@ -218,22 +225,21 @@
                         <div class="col m4 s12 flow-text select">
                             Väl godkänt
                         </div>
-                        <div class="col m7 s10 desc"><div class="description">{{question.well_done_description}}</div></div>
-                        <div class="col m1 s2 switch toggle"><i class="material-icons">import_export</i></div>
+                        <div class="col s10 desc"><div class="description">{{question.well_done_description}}</div></div>
+                        <div class="col s2 switch toggle"><i class="material-icons">import_export</i></div>
                     </div>
                 </div>
                 {% endif %}
                 <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V"%} result-V{%endif%}{% if answer == "V" %} result-V{%endif%}{% if answer == "U" %} result-U{%endif%}{% if answer %} collapsed{% endif %}">
                     <div class="row hide-print">
-                        <div class="col m4 s12 flow-text select">
+                        <div class="col s12 flow-text select">
                             Underkänt
                         </div>
-                        <div class="col m7 s10 desc"><div class="description">{{question.not_done_description}}</div></div>
-                        <div class="col m1 s2 switch toggle"><i class="material-icons">import_export</i></div>
+                        <div class="col s10 desc"><div class="description">{{question.not_done_description}}</div></div>
+                        <div class="col s2 switch toggle"><i class="material-icons">import_export</i></div>
                     </div>
                 </div>
             </div>
-            <hr/>
             {% endwith %}
             {% endfor %}
         </div>
@@ -264,10 +270,6 @@
                             <input disabled id="sign_date" type="text" class="validate" value="{{ todays_date }}">
                             <label for="sign_date">Datum för signering</label>
                         </div>
-                        <div class="action-plan card-panel red darken-3 white-text">
-                            <h4>Risk för underkännande</h4>
-                            <p>Vid risk för underkännande måste en åtgärdsplan upprättas</p>
-                        </div>
                         <h5>Närvarande vid halvtidsbedömning</h5>
                         <div class="signers">
                             <div class="signer">
@@ -292,6 +294,10 @@
                             </div>
                         </div>
                         <a href="#" id="add_user"><i class="material-icons small">add</i> Lägg till fält</a>
+                        <div class="action-plan card-panel red lighten-1 white-text">
+                            <h4>Risk för underkännande</h4>
+                            <p>Vid risk för underkännande måste en åtgärdsplan upprättas</p>
+                        </div>
                     </div>
                     <div class="input-field">
                         <input type="submit" value="Uppdatera" class="btn-large"/>

@@ -78,13 +78,7 @@
     text-align: center;
     background-color: #ddd;
 }
-.row .number-box {
-    float: left;
-    margin-right: 10px;
-}
-.row .question-description {
-    float: left;
-}
+
 table tbody td {
     vertical-align: top;
 }
@@ -96,7 +90,10 @@ table tbody td p {
     font-size: 1.2rem;
 }
 p.checkbox {
-    margin-bottom: 30px;
+    margin-bottom: 50px;
+}
+.action-plan {
+    margin: 50px auto;
 }
 hr {
     border: 1px solid #ccc;

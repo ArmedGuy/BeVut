@@ -40,6 +40,17 @@ def course(request, *args, **kwargs):
         students = [x.student for x in student_forms]
     return render(request, "app/course.html", {"course": course, "student_forms": student_forms, "students": students})
 
+@login_required
+def course_action_plan(request, *args, **kwargs):
+    course = get_object_or_404(Course, pk=kwargs['id'])
+    student_forms = course.student_forms.filter(midterm_action_plan__in=['yes','started'])
+    students = []
+    if len(student_forms) == 0:
+        students = course.students.all()
+    else:
+        students = [x.student for x in student_forms]
+    return render(request, "app/course_action_plan.html", {"course": course, "student_forms": student_forms, "students": students})
+
 
 @login_required
 def student_form(request, *args, **kwargs):
@@ -151,7 +162,6 @@ def student_form(request, *args, **kwargs):
 
 
 @require_GET
-@login_required
 def readonly_studentform(request, *args, **kwargs):
     form = None
     try:
