@@ -168,5 +168,4 @@ class FormAnswer(models.Model):
         verbose_name = "formulärssvar"
         verbose_name_plural = "formulärssvar"
 
-
 # vi: ts=4 expandtab

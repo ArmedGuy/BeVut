@@ -12,6 +12,8 @@ from app.models import Course, StudentForm, FormAnswer, FormSigningAttendance
 from datetime import datetime
 from django.views.decorators.http import require_GET
 
+from .log import log
+
 
 def home(request):
     """Renders the home page."""
@@ -24,6 +26,10 @@ def home(request):
 @login_required
 def courses(request):
     courses = Course.objects.all()
+    course = courses[0]
+    print('logging')
+    log('heeey!', request.user,  course)
+    print('logged')
     return render(request, "app/index.html", {"courses": courses})
 
 
