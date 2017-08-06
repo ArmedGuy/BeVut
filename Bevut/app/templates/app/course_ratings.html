@@ -4,9 +4,6 @@
 <div class="container">
     <h2>{{ course.name }} <small class="grey-text">Kurs {{ course.year }} {{ course.term }}</small></h2>
     {% if student_forms %}
-    <div class="card-panel grey lighten-5">
-        <a href="{% url 'course_action_plan' course.id %}">Visa studenter med åtgärdsplan</a>
-    </div>
     <table class="striped">
         <thead>
             <tr>

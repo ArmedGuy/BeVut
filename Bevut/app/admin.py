@@ -134,7 +134,7 @@ class StudentAdmin(admin.ModelAdmin):
             form = MultipleStudentForm(request.POST, request.FILES)
             if form.is_valid():
                 file = request.FILES["csv_file"]
-                if True in [file.name.endswith(d) for d in [".csv", ".xls", ".xlsx"]]:
+                if any(file.name.endswith(d) for d in [".csv", ".xls", ".xlsx"]):
                     file.open()
                     added = 0
                     already_existed = []
@@ -147,17 +147,21 @@ class StudentAdmin(admin.ModelAdmin):
                         email = row[2]
                         s = Student()
                         s.name = name
-                        s.ssn = ssn
+                        s.ssn = ssn.replace('-', '') # tillåt import av personnr med -, bara ta bort det.
                         s.email = email
                         s.populate_hash()
 
                         try:
-                            s.full_clean()
+                            s.clean_fields()
+                            s.clean()
                             s.save()
                             added += 1
                             if course is not None:
                                 course.students.add(s)
                         except IntegrityError:
+                            if course is not None:
+                                existing = Student.objects.get(ssn=ssn)
+                                course.students.add(existing)
                             already_existed.append(ssn)
                         except ValidationError as ve:
                             self.message_user(request, "{}: {}".format(s.ssn, ", ".join(ve.messages)), ERROR)
@@ -167,12 +171,17 @@ class StudentAdmin(admin.ModelAdmin):
                     else:
                         self.message_user(request, "La till {} student(er).".format(added))
 
-                    if len(already_existed) > 0:
+                    if len(already_existed) > 0 and course is None:
                         self.message_user(
                                 request,
                                 "{} student(er) fanns redan ({})".format(
                                     len(already_existed),
                                     ", ".join(already_existed)), ERROR)
+                    elif len(already_existed) > 0 and course is not None:
+                        self.message_user(
+                                request,
+                                "La in {} existerande studenter i kursen".format(
+                                     len(already_existed)))
 
                     if course is None:
                         return redirect(reverse("admin:app_student_changelist"))
