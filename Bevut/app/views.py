@@ -3,19 +3,16 @@ Definition of views.
 """
 
 from uuid import UUID
+from datetime import datetime
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, Http404
 from django.urls import reverse
-from django.db import transaction
 from django.contrib.auth.decorators import login_required
-from app.models import Course, StudentForm, FormAnswer, FormSigningAttendance
-from datetime import datetime
 from django.views.decorators.http import require_GET
 import django.contrib.messages as messages
 
-from app.models import Course, StudentForm, FormAnswer
-
+from app.models import Course, StudentForm, FormAnswer, FormSigningAttendance
 
 def home(request):
     """Renders the home page."""
@@ -40,7 +37,9 @@ def course(request, *args, **kwargs):
         students = course.students.all()
     else:
         students = [x.student for x in student_forms]
-    return render(request, "app/course.html", {"course": course, "student_forms": student_forms, "students": students})
+    return render(request, "app/course.html", 
+                  {"course": course, "student_forms": student_forms, "students": students})
+
 
 @login_required
 def course_action_plan(request, *args, **kwargs):
@@ -51,7 +50,8 @@ def course_action_plan(request, *args, **kwargs):
         students = course.students.all()
     else:
         students = [x.student for x in student_forms]
-    return render(request, "app/course_action_plan.html", {"course": course, "student_forms": student_forms, "students": students})
+    return render(request, "app/course_action_plan.html", 
+                  {"course": course, "student_forms": student_forms, "students": students})
 
 
 @login_required
@@ -117,7 +117,8 @@ def student_form(request, *args, **kwargs):
                 answer.save()
         if request.POST.get("sign"):
             if missing_value:
-                messages.error(request, "Alla delar av formuläret är inte ifyllt.", extra_tags="red darken-2 white-text")
+                messages.error(request, 
+                               "Alla delar av formuläret är inte ifyllt.", extra_tags="red darken-2 white-text")
                 return render(request, "app/form.html", ctx)
             elif ctx['midterm_in_progress']:
                 form.midterm_signed = True
@@ -128,7 +129,7 @@ def student_form(request, *args, **kwargs):
                 for i in range(len(names)):
                     attendee = FormSigningAttendance(title=positions[i], name=names[i], midterm_sign=form)
                     attendee.save()
-                
+
             elif ctx['fullterm_in_progress']:
                 form.fullterm_signed = True
                 form.fullterm_signed_date = datetime.today()
@@ -138,8 +139,7 @@ def student_form(request, *args, **kwargs):
                     print("creating %s" % names[i])
                     attendee = FormSigningAttendance(title=positions[i], name=names[i], fullterm_sign=form)
                     attendee.save()
-        
-                
+
         if ctx['midterm_in_progress']:
             form.midterm_comments = request.POST.get("comments", "")
             form.midterm_absence = request.POST.get("absence", "")

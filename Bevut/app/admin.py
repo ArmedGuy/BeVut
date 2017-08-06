@@ -147,7 +147,7 @@ class StudentAdmin(admin.ModelAdmin):
                         email = row[2]
                         s = Student()
                         s.name = name
-                        s.ssn = ssn.replace('-', '') # tillåt import av personnr med -, bara ta bort det.
+                        s.ssn = ssn.replace('-', '')  # tillåt import av personnr med -, bara ta bort det.
                         s.email = email
                         s.populate_hash()
 

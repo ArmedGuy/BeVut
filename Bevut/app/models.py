@@ -118,6 +118,8 @@ ACTION_PLAN_CHOICES = (
     ("yes", "Åtgärdsplan behöver upprättas"),
     ("started", "Åtgärdsplan har upprättats")
 )
+
+
 class StudentForm(models.Model):
     student = models.ForeignKey(Student)
     course = models.ForeignKey(Course, related_name="student_forms", null=True)
@@ -133,7 +135,8 @@ class StudentForm(models.Model):
     midterm_absence = models.CharField("Frånvaro vid halvtidsbedömning", max_length=10, blank=True)
     fullterm_absence = models.CharField("Frånvaro vid heltidsbedömning", max_length=10, blank=True)
     fullterm_ok_absence = models.CharField("Godkänd frånvaro vid heltidsbedömning", max_length=10, blank=True)
-    midterm_action_plan = models.CharField("Status för åtgärdsplan vid halvtidsbedömning", max_length=6, default="no", choices=ACTION_PLAN_CHOICES)
+    midterm_action_plan = models.CharField("Status för åtgärdsplan vid halvtidsbedömning",
+                                            max_length=6, default="no", choices=ACTION_PLAN_CHOICES)
     locked = models.BooleanField("Låst", default=False)
     link_uuid = models.UUIDField('Read only länk id', default=uuid4, editable=True)
 
