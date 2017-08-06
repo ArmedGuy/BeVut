@@ -1,69 +1,57 @@
 {% extends "app/app_layout.html" %}
 {% load dict_tags %}
-{% block scripts %}
-<script type="text/template" id="signer-template">
-    <div class="signer">
-        <div class="row">
-            <div class="col s6">
-                <div class="input-field">
-                    <input id="signer_name%{num}" required type="text" name="signer_name" class="validate" value="">
-                    <label for="signer_name%{num}">Namn på person</label>
-                </div>
-            </div>
-            <div class="col s5">
-                <div class="input-field">
-                    <input id="signer_position%{num}" required type="text" name="signer_position" class="validate" value="">
-                    <label for="signer_position%{num}">Befattning</label>
-                </div>
-            </div>
-            <div class="col s1">
-                <div class="delete-btn"><i class="material-icons">close</i>
-                </div>
-            </div>
-        </div>
-    </div>
-</script>
-{% endblock %}
 {% block content %}
 <div id="state-holder" class="container {% if midterm_in_progress %}midterm{% endif %} {% if fullterm_in_progress %}fullterm{% endif %} readonly">
-    <h2>{{ student_form.student }} <br /><small class="grey-text">Bedömning i {{ student_form.course }}</small></h2>
-        <div class="card-panel grey lighten-5">
-            <h5>Information</h5>
-            <div class="input-field">
-                <input disabled id="ssn" type="text" value="{{ student_form.student.ssn }}">
-                <label for="ssn">Personnummer</label>
+    <div class="row">
+        {% if logged_in %}
+        <div class="col s12">
+            {% if student_form.midterm_signed and student_form.midterm_action_plan == 'yes' %}
+            <div class="card red white-text">
+                <div class="card-content">
+                    <h4>Risk för underkännande</h4>
+                    <p>Vid risk för underkännande måste en åtgärdsplan upprättas</p>
+                </div>
+                <div class="card-action white black-text">
+                    <p class="checkbox white-text">
+                        <input type="checkbox" name="action_plan" id="action_plan" value="started"/>
+                        <label for="action_plan">Åtgärdsplan har upprättats</label>
+                    </p>
+                    <div class="input-field">
+                        <input type="submit" value="Uppdatera" class="btn"/>
+                    </div>
+                </div>
             </div>
-            <div class="input-field">
-                <input id="handler" disabled type="text" name="handler" class="validate" value="{{ student_form.handler }}">
-                <label for="handler">Handledare/ansvarig</label>
+            {% elif student_form.midterm_action_plan == 'started' %}
+            <div class="card-panel red lighten-2 white-text">
+                <h4>Risk för underkännande</h4>
+                <p>Åtgärdsplan har upprättats efter halvtidsbedömning</p>
             </div>
-            <div class="input-field">
-                <input id="location" disabled type="text" name="location" class="validate" value="{{ student_form.location }}">
-                <label for="location">VFU-placering</label>
-            </div>
+            {% endif %}
         </div>
-        
-        <div class="row">
-            <div class="col s12">
-                <div class="card-panel blue-grey darken-2 white-text hide-print">
+        {% endif %}
+        <div class="col s12 m6">
+            <div class="card-panel blue-grey darken-2 white-text hide-print">
                 <h5>Halvtidsbedömning</h5>
                 {% if student_form.midterm_signed %}
                 <h4>Slutförd {{student_form.midterm_signed_date}}</h4>
+
                 {% elif midterm_in_progress %}
                 <h4>Påbörjad</h4>
                 {% else %}
                 <h4>Ej genomförd</h4>
+                <a class="waves-effect waves-light btn" href="?term=midterm">Påbörja</a>
                 {% endif %}
-                </div>
-                <div class="card-panel grey lighten-5 show-print">
-                    <div class="input-field">
-                        <input id="midterm_status" disabled type="text" value="{% if student_form.midterm_signed %}Slutförd {{student_form.midterm_signed_date}}{% elif midterm_in_progress %}Påbörjad{% else %}Ej genomförd{% endif %}" />
-                        <label for="midterm_status">Halvtidsbedömning</label>
-                    </div>
+            </div>
+            <div class="card-panel grey lighten-5 show-print">
+                <div class="input-field">
+                    <input id="midterm_status" disabled type="text" value="{% if student_form.midterm_signed %}Slutförd {{student_form.midterm_signed_date}}{% elif midterm_in_progress %}Påbörjad{% else %}Ej genomförd{% endif %}" />
+                    <label for="midterm_status">Halvtidsbedömning</label>
                 </div>
             </div>
-            <div class="col s12">
-                <div class="card-panel blue-grey darken-2 white-text hide-print">
+        </div>
+
+        <div class="col s12 m6">
+            <div class="card-panel blue-grey darken-2 white-text hide-print">
                 <h5>Heltidsbedömning</h5>
                 {% if student_form.fullterm_signed %}
                 <h4>Slutförd {{student_form.fullterm_signed_date}}</h4>
@@ -71,105 +59,114 @@
                 <h4>Påbörjad</h4>
                 {% else %}
                 <h4>Ej genomförd</h4>
+                <a class="waves-effect waves-light btn" {% if not student_form.midterm_signed %}disabled{% endif %} href="?term=fullterm">Påbörja</a>
                 {% if not student_form.midterm_signed %}
                 Halvtidsbedöming inte klar
                 {% endif %}
                 {% endif %}
-                </div>
-                <div class="card-panel grey lighten-5 show-print">
-                    <div class="input-field">
-                        <input id="fullterm_status" disabled type="text" value="{% if student_form.fullterm_signed %}Slutförd {{student_form.fullterm_signed_date}}{% elif fullterm_in_progress %}Påbörjad{% else %}Ej genomförd{% endif %}" />
-                        <label for="fullterm_status">Heltidssbedömning</label>
-                    </div>
+            </div>
+            <div class="card-panel grey lighten-5 show-print">
+                <div class="input-field">
+                    <input id="fullterm_status" disabled type="text" value="{% if student_form.fullterm_signed %}Slutförd {{student_form.fullterm_signed_date}}{% elif fullterm_in_progress %}Påbörjad{% else %}Ej genomförd{% endif %}" />
+                    <label for="fullterm_status">Heltidssbedömning</label>
                 </div>
             </div>
         </div>
-        <div class="new-page"></div>
-        <div class="row">
-            <div class="col s6">
-                <div class="card-panel grey lighten-5">
-                    <h4>Om kursen</h4>
-                    <p>
-                        {{student_form.course.description}}
-                    </p>
-                </div>
-            </div>
-            <div class="col s6">
-                <div class="card-panel grey lighten-5 help-midterm">Vid halvtidbedömning</div>
-                <div class="card-panel grey lighten-5 help-fullterm">Vid heltidsbedömning</div>
+    </div>
+    <div class="card-panel grey lighten-5">
+        <h5>Information</h5>
+        <div class="input-field">
+            <input disabled id="ssn" type="text" value="{{ student_form.student.ssn }}">
+            <label for="ssn">Personnummer</label>
+        </div>
+        <div class="input-field">
+            <input id="handler" disabled type="text" name="handler" class="validate" value="{{ student_form.handler }}">
+            <label for="handler">Handledare/ansvarig</label>
+        </div>
+        <div class="input-field">
+            <input id="location" disabled type="text" name="location" class="validate" value="{{ student_form.location }}">
+            <label for="location">VFU-placering</label>
+        </div>
+    </div>
+    <div class="new-page"></div>
+    <div class="row">
+        <div class="col s12">
+            <div class="card-panel blue-grey darken-2 white-text">
+                <h4>Om kursen</h4>
+                <p>
+                    {{student_form.course.description}}
+                </p>
             </div>
         </div>
-        <div class="questions row">
-            {% for question in student_form.template.formoption_set.all %}
-            {% with answer=current_answers|get_item:question.id %}
-            <div class="question col s12 m6">
-                 {% if midterm_in_progress %}
-                    <input type="hidden" name="{{question.id}}" value="{{ midterm_answers|get_item:question.id }}"/>
-                    {% endif %}
-                    {% if fullterm_in_progress %}
-                    <input type="hidden" name="{{question.id}}" value="{{ fullterm_answers|get_item:question.id }}"/>
-                    {% endif %}
-                <div class="card-panel blue-grey darken-2 white-text">
-                    <div class="row">
-                        <div class="col s12">
-                            <h4>{{question.nr}}</h4>
-                        </div>
-                        <div class="col s12 question-description">{{ question.description }}</div>
-                    </div>
+    </div>
+    <div class="questions row">
+        <div class="col s12">
+            <div class="row">
+                <div class="col s5 push-s1 m3 push-m3 card-panel grey lighten-5 help-midterm">Vid halvtidbedömning</div>
+                <div class="col s5 push-s1 m3 push-m3 card-panel grey lighten-5 help-fullterm">Vid heltidsbedömning</div>
+            </div>
+        </div>
+    {% for question in student_form.template.formoption_set.all %}
+    {% with answer=current_answers|get_item:question.id %}
+    <div class="question col s12 m6">
+        {% if midterm_in_progress %}
+        <input type="hidden" name="{{question.id}}" value="{{ midterm_answers|get_item:question.id }}"/>
+        {% endif %}
+        {% if fullterm_in_progress %}
+        <input type="hidden" name="{{question.id}}" value="{{ fullterm_answers|get_item:question.id }}"/>
+        {% endif %}
+        <div class="card-panel blue-grey darken-2 white-text">
+            <div class="row">
+                <div class="col s12">
+                    <h4>{{question.nr}}</h4>
                 </div>
-                <div data-answer="G" class="card-panel grey lighten-5 answer-box{% if show_midterm_answer and midterm_answers|get_item:question.id == "OK"%} result-OK{%endif%}{% if answer == "OK" %} result-OK{%endif%}{% if answer == "G" %} result-G{%endif%}">
-                    <div class="row hide-print">
-                        <div class="col s12 flow-text select">
-                            Godkänt
-                        </div>
-                        <div class="col s10 desc"><div class="description">{{question.done_description}}</div></div>
-                        <div class="col s2 switch toggle"><i class="material-icons">import_export</i></div>
-                    </div>
-                    <div class="show-print">
-                        <div class="input-field">
-                            <textarea id="q{{question.id}}pd"class="materialize-textarea">{{question.done_description}}</textarea>
-                            <label for="q{{question.id}}pd">Godkänt</label>
-                        </div>
-                    </div>
+                <div class="col s12 question-description">{{ question.description }}</div>
+            </div>
+        </div>
+        <div data-answer="G" class="card-panel grey lighten-5 answer-box{% if show_midterm_answer and midterm_answers|get_item:question.id == "OK"%} result-OK{%endif%}{% if answer == "OK" %} result-OK{%endif%}{% if answer == "G" %} result-G{%endif%}">
+            <div class="row">
+                <div class="col s12 select">
+                    <h5>Godkänt</h5>
                 </div>
-                {% if student_form.template.has_well_done and not midterm_in_progress %}
-                <div data-answer="VG" class="card-panel grey lighten-5 answer-box{% if answer == "VG" %} result-VG{%endif%}{% if answer %} collapsed{% endif %}">
-                    <div class="row hide-print">
-                        <div class="col s12 flow-text select">
-                            Väl godkänt
-                        </div>
-                        <div class="col s10 desc"><div class="description">{{question.well_done_description}}</div></div>
-                        <div class="col s2 switch toggle"><i class="material-icons">import_export</i></div>
-                    </div>
-                    <div class="show-print">
-                        <div class="input-field">
-                            <textarea id="q{{question.id}}pwd"class="materialize-textarea">{{question.well_done_description}}</textarea>
-                            <label for="q{{question.id}}pwd">Väl godkänt</label>
-                        </div>
-                    </div>
+                <div class="col s10 desc">
+                    <div class="description">{{question.done_description}}</div>
                 </div>
-                {% endif %}
-                <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V"%} result-V{%endif%}{% if answer == "V" %} result-V{%endif%}{% if answer == "U" %} result-U{%endif%}">
-                    <div class="row hide-print">
-                        <div class="col s12 flow-text select">
-                            Underkänt
-                        </div>
-                        <div class="col s10 desc"><div class="description">{{question.not_done_description}}</div></div>
-                        <div class="col s2 switch toggle"><i class="material-icons">import_export</i></div>
-                    </div>
-                    <div class="show-print">
-                        <div class="input-field">
-                            <textarea id="q{{question.id}}pnd"class="materialize-textarea">{{question.not_done_description}}</textarea>
-                            <label for="q{{question.id}}pnd">Underkänt</label>
-                        </div>
-                    </div>
+                <div class="col s2 switch toggle"><i class="material-icons">import_export</i>
                 </div>
             </div>
-            {% endwith %}
-            {% endfor %}
         </div>
+        {% if student_form.template.has_well_done and not midterm_in_progress %}
+        <div data-answer="VG" class="card-panel grey lighten-5 answer-box{% if answer == "VG" %} result-VG{%endif%}{% if answer %} collapsed{% endif %}">
+            <div class="row">
+                <div class="col s12 select">
+                    <h5>Väl godkänt</h5>
+                </div>
+                <div class="col s10 desc">
+                    <div class="description">{{question.well_done_description}}</div>
+                </div>
+                <div class="col s2 switch toggle"><i class="material-icons">import_export</i>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V" %} result-V{%endif%}{% if answer == "V" %} result-V{%endif%}{% if answer == "U" %} result-U{%endif%}">
+            <div class="row">
+                <div class="col s12 select">
+                    <h5>Underkänt</h5>
+                </div>
+                <div class="col s10 desc">
+                    <div class="description">{{question.not_done_description}}</div>
+                </div>
+                <div class="col s2 switch toggle"><i class="material-icons">import_export</i>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+</div>
  
-        {% if student_form.midterm_signed %}
+        {% if student_form.midterm_signed and logged_in %}
         <div class="new-page"></div>
         <div class="card-panel grey lighten-5">
             <h4>Halvtidsbedömning</h4>

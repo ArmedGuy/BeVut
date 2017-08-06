@@ -7,10 +7,12 @@ from uuid import UUID
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, Http404
 from django.urls import reverse
+from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from app.models import Course, StudentForm, FormAnswer, FormSigningAttendance
 from datetime import datetime
 from django.views.decorators.http import require_GET
+import django.contrib.messages as messages
 
 from app.models import Course, StudentForm, FormAnswer
 
@@ -89,8 +91,10 @@ def student_form(request, *args, **kwargs):
         if form.locked:
             return render(request, "app/form.html", ctx)
         action_plan = 'no'
+        missing_value = False
         for opt in form.template.formoption_set.all():
             if not request.POST.get(str(opt.id), False):
+                missing_value = True
                 continue
             res = request.POST.get(str(opt.id))
             if ctx['midterm_in_progress']:
@@ -112,7 +116,10 @@ def student_form(request, *args, **kwargs):
                 ctx['current_answers'][opt.id] = res
                 answer.save()
         if request.POST.get("sign"):
-            if ctx['midterm_in_progress']:
+            if missing_value:
+                messages.error(request, "Alla delar av formuläret är inte ifyllt.", extra_tags="red darken-2 white-text")
+                return render(request, "app/form.html", ctx)
+            elif ctx['midterm_in_progress']:
                 form.midterm_signed = True
                 form.midterm_signed_date = datetime.today()
                 names = request.POST.getlist("signer_name")
@@ -122,11 +129,10 @@ def student_form(request, *args, **kwargs):
                     attendee = FormSigningAttendance(title=positions[i], name=names[i], midterm_sign=form)
                     attendee.save()
                 
-            if ctx['fullterm_in_progress']:
+            elif ctx['fullterm_in_progress']:
                 form.fullterm_signed = True
                 form.fullterm_signed_date = datetime.today()
                 names = request.POST.getlist("signer_name")
-                print(names)
                 positions = request.POST.getlist("signer_position")
                 for i in range(len(names)):
                     print("creating %s" % names[i])
@@ -158,6 +164,7 @@ def student_form(request, *args, **kwargs):
         ctx['show_midterm_answer'] = not ctx['midterm_in_progress'] and (
                 ctx['fullterm_in_progress'] and not form.fullterm_signed
                 ) or request.GET.get("show_midterm")
+        messages.info(request, "Formuläret har blivit uppdaterat", extra_tags="light-green white-text")
         return render(request, "app/form.html", ctx)
 
 
@@ -174,6 +181,7 @@ def readonly_studentform(request, *args, **kwargs):
         raise Http404()
     ctx = {}
     ctx['todays_date'] = datetime.today().strftime('%Y-%m-%d')
+    ctx['logged_in'] = not request.user.is_anonymous
     ctx['student_form'] = form
     ctx['current_answers'] = {}
     ctx['midterm_answers'] = {}
@@ -196,9 +204,7 @@ def readonly_studentform(request, *args, **kwargs):
                 request.POST.get("term"),
                 request.GET.get("term")]
             or len(ctx['fullterm_answers']) != 0) and not form.fullterm_signed and not ctx['midterm_in_progress']
-    ctx['show_midterm_answer'] = not ctx['midterm_in_progress'] and (
-            ctx['fullterm_in_progress'] and not form.fullterm_signed
-            ) or request.GET.get("show_midterm")
+    ctx['show_midterm_answer'] = ctx['logged_in']
     return render(request, 'app/form_readonly.html', ctx)
 
 # vi: ts=4 expandtab

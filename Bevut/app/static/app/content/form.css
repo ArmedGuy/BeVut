@@ -1,4 +1,7 @@
-﻿.question {
+﻿nav {
+    margin-bottom: 20px;
+}
+.question {
     margin-bottom: 40px;
 }
     .answer-done, .answer-not-done, .answer-well-done {
@@ -90,6 +93,8 @@ table tbody td p {
     font-size: 1.2rem;
 }
 p.checkbox {
+}
+p.checkbox.before-input {
     margin-bottom: 50px;
 }
 .action-plan {
