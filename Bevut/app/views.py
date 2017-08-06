@@ -14,6 +14,7 @@ import django.contrib.messages as messages
 
 from app.models import Course, StudentForm, FormAnswer, FormSigningAttendance
 
+
 def home(request):
     """Renders the home page."""
     assert isinstance(request, HttpRequest)
@@ -37,20 +38,20 @@ def course(request, *args, **kwargs):
         students = course.students.all()
     else:
         students = [x.student for x in student_forms]
-    return render(request, "app/course.html", 
+    return render(request, "app/course.html",
                   {"course": course, "student_forms": student_forms, "students": students})
 
 
 @login_required
 def course_action_plan(request, *args, **kwargs):
     course = get_object_or_404(Course, pk=kwargs['id'])
-    student_forms = course.student_forms.filter(midterm_action_plan__in=['yes','started'])
+    student_forms = course.student_forms.filter(midterm_action_plan__in=['yes', 'started'])
     students = []
     if len(student_forms) == 0:
         students = course.students.all()
     else:
         students = [x.student for x in student_forms]
-    return render(request, "app/course_action_plan.html", 
+    return render(request, "app/course_action_plan.html",
                   {"course": course, "student_forms": student_forms, "students": students})
 
 
@@ -117,7 +118,7 @@ def student_form(request, *args, **kwargs):
                 answer.save()
         if request.POST.get("sign"):
             if missing_value:
-                messages.error(request, 
+                messages.error(request,
                                "Alla delar av formuläret är inte ifyllt.", extra_tags="red darken-2 white-text")
                 return render(request, "app/form.html", ctx)
             elif ctx['midterm_in_progress']:
