@@ -108,7 +108,7 @@
         </div>
     {% for question in student_form.template.formoption_set.all %}
     {% with answer=current_answers|get_item:question.id %}
-    <div class="question col s12 m6">
+    <div class="question col s12">
         {% if midterm_in_progress %}
         <input type="hidden" name="{{question.id}}" value="{{ midterm_answers|get_item:question.id }}"/>
         {% endif %}
