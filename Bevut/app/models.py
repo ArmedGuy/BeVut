@@ -10,10 +10,12 @@ from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.core.validators import RegexValidator
+from simple_history.models import HistoricalRecords
 
 # Create your models here.
 
-User.__str__ = lambda self: "%s %s" % (self.first_name, self.last_name)
+User.__str__ = lambda self: "%s %s" % (self.first_name, self.last_name) \
+        if self.first_name != '' and self.last_name != '' else self.username
 
 
 class Student(models.Model):
@@ -26,6 +28,7 @@ class Student(models.Model):
     email = models.EmailField("Email", unique=True)
     deleted = models.BooleanField("Borttagen", default=False)
     identity = models.CharField("Identitet", unique=True, max_length=64)
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.name
@@ -59,6 +62,7 @@ class Course(models.Model):
     term = models.CharField("Termin", choices=TERM_CHOICES, max_length=2)
     weeks = models.CharField("Antal veckor VFU", max_length=32)
     students = models.ManyToManyField(Student, verbose_name="studenter")
+    history = HistoricalRecords()
 
     def __str__(self):
         return "%s (%s %s)" % (self.name, self.year, self.term)
@@ -66,6 +70,10 @@ class Course(models.Model):
     class Meta:
         verbose_name = "kurs"
         verbose_name_plural = "kurser"
+        permissions = (
+            ('can_view_app_courses', 'Lista kurser i appvyn'),
+            ('can_view_app_course', 'Lista kurs i appvyn'),
+        )
 
 
 class FormTemplate(models.Model):
@@ -80,6 +88,7 @@ class FormTemplate(models.Model):
             verbose_name="Applicerad på kurs",
             null=True,
             default=None)
+    history = HistoricalRecords()
 
     def __str__(self):
         if self.applied:
@@ -129,6 +138,7 @@ class StudentForm(models.Model):
     fullterm_ok_absence = models.CharField("OK Frånvaro vid heltidsbedömning", max_length=10, blank=True)
     locked = models.BooleanField("Låst", default=False)
     link_uuid = models.UUIDField('Read only länk id', default=uuid4, editable=True)
+    history = HistoricalRecords()
 
     def __str__(self):
         return "%s - %s" % (self.student.name, self.course)
@@ -136,6 +146,9 @@ class StudentForm(models.Model):
     class Meta:
         verbose_name = "studentformulär"
         verbose_name_plural = "studentformulär"
+        permissions = (
+            ('can_view_app_student_form', 'Visa studentformulär'),
+        )
 
 
 class FormSigningAttendance(models.Model):

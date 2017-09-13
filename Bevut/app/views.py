@@ -7,12 +7,10 @@ from uuid import UUID
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, Http404
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from app.models import Course, StudentForm, FormAnswer, FormSigningAttendance
 from datetime import datetime
 from django.views.decorators.http import require_GET
-
-from .log import log
 
 
 def home(request):
@@ -24,16 +22,15 @@ def home(request):
 
 
 @login_required
+@permission_required('app.can_view_app_courses')
 def courses(request):
+    print(request.user.username)
     courses = Course.objects.all()
-    course = courses[0]
-    print('logging')
-    log('heeey!', request.user,  course)
-    print('logged')
     return render(request, "app/index.html", {"courses": courses})
 
 
 @login_required
+@permission_required('app.can_view_app_course')
 def course(request, *args, **kwargs):
     course = get_object_or_404(Course, pk=kwargs['id'])
     student_forms = course.student_forms.all()
@@ -46,6 +43,7 @@ def course(request, *args, **kwargs):
 
 
 @login_required
+@permission_required('app.can_view_app_student_form')
 def student_form(request, *args, **kwargs):
     ctx = {}
     form = get_object_or_404(StudentForm, pk=kwargs['id'])
@@ -147,12 +145,10 @@ def student_form(request, *args, **kwargs):
 
 
 @require_GET
-@login_required
 def readonly_studentform(request, *args, **kwargs):
     studentform = None
     try:
         uuid = UUID(kwargs["uuid"])
-        print(uuid)
         studentform = StudentForm.objects.filter(link_uuid=uuid).first()
     except:
         pass

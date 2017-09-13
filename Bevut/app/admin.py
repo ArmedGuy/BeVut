@@ -13,6 +13,7 @@ from django.contrib.messages import ERROR
 from django.db import IntegrityError, models
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
+from simple_history.admin import SimpleHistoryAdmin
 
 from app.models import Student, Course, FormTemplate, FormOption, StudentForm
 
@@ -116,7 +117,7 @@ class MultipleStudentForm(forms.Form):
 
 
 @admin.register(Student)
-class StudentAdmin(admin.ModelAdmin):
+class StudentAdmin(SimpleHistoryAdmin):
 
     exclude = ('identity',)
 
@@ -192,7 +193,7 @@ class StudentAdmin(admin.ModelAdmin):
 
 
 @admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
+class CourseAdmin(SimpleHistoryAdmin):
     save_as = True
     radio_fields = {'term': admin.HORIZONTAL}
     filter_horizontal = ['students']
@@ -219,6 +220,11 @@ class CourseAdmin(admin.ModelAdmin):
 
     def import_students(self, request, *args, **kwargs):
         return HttpResponse('swag')
+
+
+@admin.register(StudentForm)
+class StudentFormAdmin(SimpleHistoryAdmin):
+    pass
 
 
 admin.site.disable_action('delete_selected')
