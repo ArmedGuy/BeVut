@@ -129,9 +129,6 @@ class StudentAdmin(admin.ModelAdmin):
         ]
         return urls + student_urls
 
-    def add_students(self, swag):
-        pass
-
     def add_multiple_students(self, request, *args, **kwargs):
         course_id = request.POST.get('course_id', '') if request.method == 'POST' else request.GET.get('course', '')
         course = Course.objects.filter(id=course_id).first() if re.match('^[0-9]+$', course_id) else None
