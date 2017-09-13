@@ -2,6 +2,8 @@ import csv
 import codecs
 import re
 
+from xlrd import open_workbook
+
 from django.contrib import admin
 from django.conf.urls import url
 from django.urls import reverse
@@ -127,6 +129,9 @@ class StudentAdmin(admin.ModelAdmin):
         ]
         return urls + student_urls
 
+    def add_students(self, swag):
+        pass
+
     def add_multiple_students(self, request, *args, **kwargs):
         course_id = request.POST.get('course_id', '') if request.method == 'POST' else request.GET.get('course', '')
         course = Course.objects.filter(id=course_id).first() if re.match('^[0-9]+$', course_id) else None
@@ -134,52 +139,62 @@ class StudentAdmin(admin.ModelAdmin):
             form = MultipleStudentForm(request.POST, request.FILES)
             if form.is_valid():
                 file = request.FILES["csv_file"]
-                if True in [file.name.endswith(d) for d in [".csv", ".xls", ".xlsx"]]:
+                data = []
+                if file.name.endswith('.csv'):
                     file.open()
-                    added = 0
-                    already_existed = []
-                    for row in csv.reader(codecs.iterdecode(file, 'utf-8')):
+                    data = csv.reader(codecs.interdecode(file, 'utf-8'))
+                elif True in [file.name.endswith(d) for d in [".xls", ".xlsx"]]:
+                    file.open()
+                    books = open_workbook(file_contents=file.read())
+                    if books.nsheets <= 0:
+                        self.message_user(request, 'Hittade ej någon sida i ditt excel dokument.')
+                        return redirect(reverse('admin:add_multiple_students'))
+
+                    sheet = books.sheet_by_index(0)
+                    for r in range(sheet.nrows):
+                        row = sheet.row(r)
                         if len(row) < 3:
                             continue
-
-                        ssn = row[0]
-                        name = row[1]
-                        email = row[2]
-                        s = Student()
-                        s.name = name
-                        s.ssn = ssn
-                        s.email = email
-                        s.populate_hash()
-
-                        try:
-                            s.full_clean()
-                            s.save()
-                            added += 1
-                            if course is not None:
-                                course.students.add(s)
-                        except IntegrityError:
-                            already_existed.append(ssn)
-                        except ValidationError as ve:
-                            self.message_user(request, "{}: {}".format(s.ssn, ", ".join(ve.messages)), ERROR)
-
-                    if added == 0:
-                        self.message_user(request, "Inga studenter lades till.", ERROR)
-                    else:
-                        self.message_user(request, "La till {} student(er).".format(added))
-
-                    if len(already_existed) > 0:
-                        self.message_user(
-                                request,
-                                "{} student(er) fanns redan ({})".format(
-                                    len(already_existed),
-                                    ", ".join(already_existed)), ERROR)
-
-                    if course is None:
-                        return redirect(reverse("admin:app_student_changelist"))
-
-                    return redirect(reverse("admin:app_course_change", args=(course.id,)))
+                        data.append([d.value for d in row])
                 else:
                     self.message_user(request, "Filen är ej en csv fil", ERROR)
+                    return redirect(reverse('admin:add_multiple_students'))
+
+                added = 0
+                already_existed = []
+                for row in data:
+                    s = Student()
+                    s.ssn = row[0]
+                    s.name = row[1]
+                    s.email = row[2]
+                    s.populate_hash()
+                    try:
+                        s.full_clean()
+                        s.save()
+                        added += 1
+                        if course is not None:
+                            course.students.add(s)
+                    except IntegrityError:
+                        already_existed.append(s.ssn)
+                    except ValidationError as ve:
+                        self.message_user(request, "{}: {}".format(s.ssn, ", ".join(ve.messages)), ERROR)
+
+                if added == 0:
+                    self.message_user(request, "Inga studenter lades till.", ERROR)
+                else:
+                    self.message_user(request, "La till {} student(er).".format(added))
+
+                if len(already_existed) > 0:
+                    self.message_user(
+                            request,
+                            "{} student(er) fanns redan ({})".format(
+                                len(already_existed),
+                                ", ".join(already_existed)), ERROR)
+
+                if course is None:
+                    return redirect(reverse("admin:app_student_changelist"))
+
+                return redirect(reverse("admin:app_course_change", args=(course.id,)))
             else:
                 self.message_user(request, "Formuläret är ej giltigt.", ERROR)
 
