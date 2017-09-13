@@ -1,0 +1,16 @@
+language: python
+python:
+    - "3.4"
+    - "3.5"
+    - "3.6"
+
+install:
+    - "pip install -r Bevut/requirements.txt"
+    - "pip install flake8"
+
+script:
+    - "find Bevut/Bevut -name \\*.py -exec flake8 --max-line-length 120 {} +"
+    - "find Bevut/app -not -path \"Bevut/app/migrations/*\" -name \\*.py -exec flake8 --max-line-length 120 {} +"
+    - "python Bevut/manage.py migrate"
+    - "python Bevut/manage.py test"
+

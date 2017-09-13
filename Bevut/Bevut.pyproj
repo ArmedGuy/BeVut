@@ -6,6 +6,7 @@
     <RootNamespace>Bevut</RootNamespace>
     <InterpreterId>{fad1a1cc-f1d3-439e-8a6c-e0371e0bb560}</InterpreterId>
     <InterpreterVersion>3.5</InterpreterVersion>
+    <PythonDebugWebServerCommandArguments>runserver --settings Bevut.settings %SERVER_PORT% $(CommandLineArguments)</PythonDebugWebServerCommandArguments>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -17,7 +18,7 @@
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
-    <LaunchProvider>Django launcher</LaunchProvider>
+    <LaunchProvider>Web launcher</LaunchProvider>
     <OutputPath>.</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -70,8 +71,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app\static\app\content\admin.css" />
+    <Content Include="app\static\app\content\form.css" />
+    <Content Include="app\static\app\content\print.css" />
     <Content Include="app\templates\admin\base.html" />
     <Content Include="app\templates\app\admin\apply_template.html" />
+    <Content Include="app\templates\app\course_action_plan.html" />
+    <Content Include="app\templates\app\course_ratings.html" />
+    <Content Include="app\templates\app\form_readonly.html" />
     <Content Include="app\templates\app\form.html" />
     <Content Include="app\templates\app\course.html" />
     <Content Include="app\templates\app\navmenu.html" />

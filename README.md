@@ -1,4 +1,4 @@
-# BeVut 
+# BeVut ![travis-badge](https://travis-ci.org/re3-labs/BeVut.svg?branch=master)
 
 ## Installation Guide
 

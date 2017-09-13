@@ -3,6 +3,7 @@ Definition of models.
 """
 
 from hashlib import sha256
+from uuid import uuid4
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -41,7 +42,7 @@ class Student(models.Model):
 
 # Could probaby override save function but this is more cool
 @receiver(pre_save, sender=Student)
-def studnet_ssn_hash(sender, instance, *args, **kwargs):
+def student_ssn_hash(sender, instance, *args, **kwargs):
     if instance.identity is None:
         instance.populate_hash()
 
@@ -55,9 +56,10 @@ TERM_CHOICES = (
 class Course(models.Model):
     name = models.CharField("Kursnummer", max_length=32)
     year = models.CharField("År", max_length=32)
+    description = models.TextField("Beskrivning av kursen, generella mål", default="")
     term = models.CharField("Termin", choices=TERM_CHOICES, max_length=2)
     weeks = models.CharField("Antal veckor VFU", max_length=32)
-    students = models.ManyToManyField(Student, verbose_name="studenter")
+    students = models.ManyToManyField(Student, verbose_name="studenter", blank=True)
 
     def __str__(self):
         return "%s (%s %s)" % (self.name, self.year, self.term)
@@ -111,14 +113,34 @@ class FormOption(models.Model):
         verbose_name_plural = "formulärsfrågor"
 
 
+ACTION_PLAN_CHOICES = (
+    ("no", "Behövs ej"),
+    ("yes", "Åtgärdsplan behöver upprättas"),
+    ("started", "Åtgärdsplan har upprättats")
+)
+
+
 class StudentForm(models.Model):
     student = models.ForeignKey(Student)
     course = models.ForeignKey(Course, related_name="student_forms", null=True)
     template = models.ForeignKey(FormTemplate)
+    handler = models.CharField("Handledare/ansvarig", max_length=256, blank=True)
     location = models.CharField("VFU-placering", max_length=256, blank=True)
     midterm_signed = models.BooleanField("Halvtidsbedömning gjord", default=False)
     fullterm_signed = models.BooleanField("Heltidsbedömning gjord", default=False)
+    midterm_signed_date = models.DateTimeField("Datum för halvtidsbedömining", null=True)
+    fullterm_signed_date = models.DateTimeField("Datum för heltidsbedömning", null=True)
+    midterm_comments = models.TextField("Kommentarer vid halvtidsbedömning", blank=True)
+    fullterm_comments = models.TextField("Kommentarer vid heltidbedömning", blank=True)
+    midterm_absence = models.CharField("Frånvaro vid halvtidsbedömning", max_length=10, blank=True)
+    fullterm_absence = models.CharField("Frånvaro vid heltidsbedömning", max_length=10, blank=True)
+    fullterm_ok_absence = models.CharField("Godkänd frånvaro vid heltidsbedömning", max_length=10, blank=True)
+    midterm_action_plan = models.CharField(
+            "Status för åtgärdsplan vid halvtidsbedömning",
+            max_length=6, default="no", choices=ACTION_PLAN_CHOICES
+    )
     locked = models.BooleanField("Låst", default=False)
+    link_uuid = models.UUIDField('Read only länk id', default=uuid4, editable=True)
 
     def __str__(self):
         return "%s - %s" % (self.student.name, self.course)
@@ -131,8 +153,8 @@ class StudentForm(models.Model):
 class FormSigningAttendance(models.Model):
     title = models.CharField("Titel/befattning", max_length=256)
     name = models.CharField("Namn", max_length=256)
-    midterm_sign = models.ForeignKey(StudentForm, related_name="midterm_user_signed")
-    term_sign = models.ForeignKey(StudentForm, related_name="fullterm_user_signed")
+    midterm_sign = models.ForeignKey(StudentForm, related_name="midterm_user_signed", null=True)
+    fullterm_sign = models.ForeignKey(StudentForm, related_name="fullterm_user_signed", null=True)
 
     class Meta:
         verbose_name = "signerat namn"
