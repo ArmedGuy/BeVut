@@ -161,7 +161,10 @@ class StudentAdmin(admin.ModelAdmin):
                 already_existed = []
                 for row in data:
                     s = Student()
-                    s.ssn = row[0].replace('-', '')
+                    ssn = row[0]
+                    if type(ssn) is not str:
+                        ssn = str(round(ssn))
+                    s.ssn = ssn.replace('-', '')
                     s.name = row[1]
                     s.email = row[2]
                     s.populate_hash()
