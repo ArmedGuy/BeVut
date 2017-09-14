@@ -41,6 +41,9 @@ class Student(models.Model):
     class Meta:
         verbose_name = "student"
         verbose_name_plural = "studenter"
+        permissions = (
+            ('can_add_multiple_app_student', 'Importera flera studenter från admin panelen'),
+        )
 
 
 # Could probaby override save function but this is more cool
@@ -160,6 +163,7 @@ class StudentForm(models.Model):
         verbose_name_plural = "studentformulär"
         permissions = (
             ('can_view_app_student_form', 'Visa studentformulär'),
+            ('can_view_app_student_action_plan', 'Visa åtgärdsplan'),
         )
 
 

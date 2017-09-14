@@ -23,6 +23,7 @@ def home(request):
     return redirect(reverse("login"))
 
 
+@require_GET
 @login_required
 @permission_required('app.can_view_app_courses')
 def courses(request):
@@ -31,6 +32,7 @@ def courses(request):
     return render(request, "app/index.html", {"courses": courses})
 
 
+@require_GET
 @login_required
 @permission_required('app.can_view_app_course')
 def course(request, *args, **kwargs):
@@ -45,7 +47,9 @@ def course(request, *args, **kwargs):
                   {"course": course, "student_forms": student_forms, "students": students})
 
 
+@require_GET
 @login_required
+@permission_required('app.can_view_student_action_plan')
 def course_action_plan(request, *args, **kwargs):
     course = get_object_or_404(Course, pk=kwargs['id'])
     student_forms = course.student_forms.filter(midterm_action_plan__in=['yes', 'started'])
