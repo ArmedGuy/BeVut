@@ -13,7 +13,6 @@ from django.contrib.messages import ERROR
 from django.db import IntegrityError, models
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
-from django.contrib.auth.decorators import permission_required
 from simple_history.admin import SimpleHistoryAdmin
 
 from app.models import Student, Course, FormTemplate, FormOption, StudentForm
@@ -129,7 +128,6 @@ class StudentAdmin(SimpleHistoryAdmin):
         ]
         return urls + student_urls
 
-    @permission_required('app.can_add_multiple_app_student')
     def add_multiple_students(self, request, *args, **kwargs):
         course_id = request.POST.get('course_id', '') if request.method == 'POST' else request.GET.get('course', '')
         course = Course.objects.filter(id=course_id).first() if re.match('^[0-9]+$', course_id) else None
