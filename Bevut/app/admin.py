@@ -161,17 +161,21 @@ class StudentAdmin(admin.ModelAdmin):
                 already_existed = []
                 for row in data:
                     s = Student()
-                    s.ssn = row[0]
+                    s.ssn = row[0].replace('-', '')
                     s.name = row[1]
                     s.email = row[2]
                     s.populate_hash()
                     try:
-                        s.full_clean()
+                        s.clean_fields()
+                        s.clean()
                         s.save()
                         added += 1
                         if course is not None:
                             course.students.add(s)
                     except IntegrityError:
+                        if course is not None:
+                            existing = Student.objects.get(ssn=s.ssn)
+                            course.students.add(existing)
                         already_existed.append(s.ssn)
                     except ValidationError as ve:
                         self.message_user(request, "{}: {}".format(s.ssn, ", ".join(ve.messages)), ERROR)
