@@ -129,12 +129,12 @@ class StudentForm(models.Model):
     midterm_signed = models.BooleanField("Halvtidsbedömning gjord", default=False)
     fullterm_signed = models.BooleanField("Heltidsbedömning gjord", default=False)
     midterm_signed_date = models.DateTimeField("Datum för halvtidsbedömining", null=True)
-    fullterm_signed_date = models.DateTimeField("Datum för heltidsbedömning", null=True)
+    fullterm_signed_date = models.DateTimeField("Datum för slutbedömning", null=True)
     midterm_comments = models.TextField("Kommentarer vid halvtidsbedömning", blank=True)
     fullterm_comments = models.TextField("Kommentarer vid heltidbedömning", blank=True)
     midterm_absence = models.CharField("Frånvaro vid halvtidsbedömning", max_length=10, blank=True)
-    fullterm_absence = models.CharField("Frånvaro vid heltidsbedömning", max_length=10, blank=True)
-    fullterm_ok_absence = models.CharField("Godkänd frånvaro vid heltidsbedömning", max_length=10, blank=True)
+    fullterm_absence = models.CharField("Frånvaro vid slutbedömning", max_length=10, blank=True)
+    fullterm_ok_absence = models.CharField("Godkänd frånvaro vid slutbedömning", max_length=10, blank=True)
     midterm_action_plan = models.CharField(
             "Status för åtgärdsplan vid halvtidsbedömning",
             max_length=6, default="no", choices=ACTION_PLAN_CHOICES

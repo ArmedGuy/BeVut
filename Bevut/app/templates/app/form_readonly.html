@@ -103,7 +103,7 @@
         <div class="col s12">
             <div class="row">
                 <div class="col s5 push-s1 m3 push-m3 card-panel grey lighten-5 help-midterm">Vid halvtidbedömning</div>
-                <div class="col s5 push-s1 m3 push-m3 card-panel grey lighten-5 help-fullterm">Vid heltidsbedömning</div>
+                <div class="col s5 push-s1 m3 push-m3 card-panel grey lighten-5 help-fullterm">Vid slutbedömning</div>
             </div>
         </div>
     {% for question in student_form.template.formoption_set.all %}
@@ -123,7 +123,7 @@
                 <div class="col s12 question-description">{{ question.description }}</div>
             </div>
         </div>
-        <div data-answer="G" class="card-panel grey lighten-5 answer-box{% if show_midterm_answer and midterm_answers|get_item:question.id == "OK"%} result-OK{%endif%}{% if answer == "OK" %} result-OK{%endif%}{% if answer == "G" %} result-G{%endif%}">
+        <div data-answer="G" class="card-panel grey lighten-5 answer-box{% if show_midterm_answer and midterm_answers|get_item:question.id == "OK" %} result-OK{%endif%}{% if answer == "OK" or answer == "G" %} result-{{answer}}{%endif%}">
             <div class="row">
                 <div class="col s12 select">
                     <h5>Godkänt</h5>
@@ -136,7 +136,7 @@
             </div>
         </div>
         {% if student_form.template.has_well_done and not midterm_in_progress %}
-        <div data-answer="VG" class="card-panel grey lighten-5 answer-box{% if answer == "VG" %} result-VG{%endif%}{% if answer %} collapsed{% endif %}">
+        <div data-answer="VG" class="card-panel grey lighten-5 answer-box{% if answer == "VG" %} result-VG{%endif%}">
             <div class="row">
                 <div class="col s12 select">
                     <h5>Väl godkänt</h5>
@@ -149,7 +149,7 @@
             </div>
         </div>
         {% endif %}
-        <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V" %} result-V{%endif%}{% if answer == "V" %} result-V{%endif%}{% if answer == "U" %} result-U{%endif%}">
+        <div data-answer="U" class="card-panel grey lighten-5 answer-box {% if show_midterm_answer and midterm_answers|get_item:question.id == "V" %} result-V{%endif%}{% if answer == "V" or answer == "U" %} result-{{answer}}{%endif%}">
             <div class="row">
                 <div class="col s12 select">
                     <h5>Underkänt</h5>
@@ -244,14 +244,14 @@
                     <input type="hidden" name="term" value="fullterm"/>
                     <p class="checkbox">
                         <input type="checkbox" disabled checked name="sign" id="sign" value="true"/>
-                        <label for="sign">Slutför och signera heltidsbedömning</label>
+                        <label for="sign">Slutför och signera slutbedömning</label>
                     </p>
                     <div class="signing">
                         <div class="input-field">
                             <input disabled id="sign_date" type="text" class="validate" value="{{ todays_date }}">
                             <label for="sign_date">Datum för signering</label>
                         </div>
-                        <h5>Närvarande vid heltidsbedömning</h5>
+                        <h5>Närvarande vid slutbedömning</h5>
                         <div class="signers">
                             {% for signer in student_form.fullterm_user_signed.all %}
                             <div class="signer">
